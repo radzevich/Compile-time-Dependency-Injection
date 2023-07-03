@@ -34,6 +34,23 @@ public:
 template <typename TDescriptor>
 struct Binding;
 
+class Container {
+public:
+    template<typename TDescriptor>
+    [[nodiscard]] auto Resolve() const -> decltype(auto) {
+        using TBinding = Binding<TDescriptor>;
+        using TService = typename TBinding::TService;
+
+        if constexpr (std::is_invocable_r_v<TService, TBinding, Container>) {
+            TBinding binding;
+            return binding(*this);
+        } else {
+            TService service;
+            return service;
+        }
+    }
+};
+
 template <>
 struct Binding<ADescriptor> {
     using TService = A;
@@ -47,27 +64,22 @@ struct Binding<BDescriptor> {
 template <>
 struct Binding<CDescriptor> {
     using TService = C;
-    using TArgs = std::tuple<A, B>;
-};
 
-class Container {
-public:
-    template<typename TDescriptor>
-    auto Resolve() -> decltype(auto) {
-        using TBinding = Binding<TDescriptor>;
-        using TService = typename TBinding::TService;
+    auto operator()(const Container& container) {
+        auto a = container.Resolve<ADescriptor>();
+        auto b = container.Resolve<BDescriptor>();
 
-        TService service;
-
-        return service;
+        return TService(a, b);
     }
 };
+
 
 int main() {
     Container ioc;
 
     ioc.Resolve<ADescriptor>().Whoami();
     ioc.Resolve<BDescriptor>().Whoami();
+    ioc.Resolve<CDescriptor>().Whoami();
 
     return 0;
 }
