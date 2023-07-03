@@ -1,0 +1,31 @@
+# Compiled object files
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Executables
+*.exe
+*.out
+
+# Build directories
+build/
+bin/
+
+# IDE-specific files and directories
+.vscode/
+.idea/
+
+# Dependency directories
+# Add any dependency directories here
+# For example:
+# /path/to/dependency/
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+cmake-build-debug
