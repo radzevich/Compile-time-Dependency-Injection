@@ -57,20 +57,14 @@ template <typename TDescriptor>
 struct Binding;
 
 template <typename ... TServices>
-class Container;
-
-template <typename ... TServices>
 class ServiceScope {
-private:
-    using TServiceContainer = Container<TServices...>;
-
 private:
     std::tuple<std::optional<TServices>...> Instances_;
 
 public:
-    template<typename TService, typename TFactory>
-    [[nodiscard]] TService* Resolve(const TServiceContainer& caller) {
-        static_assert(std::is_invocable_r_v<TService, TFactory, TServiceContainer&>);
+    template<typename TContainer, typename TService, typename TFactory>
+    [[nodiscard]] TService* Resolve(const TContainer& caller) {
+        static_assert(std::is_invocable_r_v<TService, TFactory, TContainer&>);
 
         auto& optInstance = std::get<std::optional<TService>>(Instances_);
         if (optInstance.has_value()) {
@@ -92,10 +86,12 @@ public:
     }
 };
 
-template <typename ... TServices>
+template <typename ... TDescriptors>
 class Container {
 private:
-    mutable ServiceScope<TServices...> Scope_;
+    using TThis = Container<TDescriptors...>;
+    using TScope = ServiceScope<typename Binding<TDescriptors>::TService...>;
+    mutable TScope Scope_;
 
 public:
     template<typename TDescriptor>
@@ -103,8 +99,8 @@ public:
         using TBinding = Binding<TDescriptor>;
         using TService = typename TBinding::TService;
 
-        if constexpr (std::is_invocable_r_v<TService, TBinding, Container<TServices...>>) {
-            return Scope_.template Resolve<TService, TBinding>(*this);
+        if constexpr (std::is_invocable_r_v<TService, TBinding, TThis>) {
+            return Scope_.template Resolve<TThis, TService, TBinding>(*this);
         } else {
             return Scope_.template Resolve<TService>();
         }
@@ -121,7 +117,7 @@ struct Binding<BDescriptor> {
     using TService = B;
 };
 
-using TServiceContainer = Container<A, B, C>;
+using TServiceContainer = Container<ADescriptor, BDescriptor, CDescriptor>;
 
 template <>
 struct Binding<CDescriptor> {
