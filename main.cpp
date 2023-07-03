@@ -56,42 +56,11 @@ public:
 template <typename TDescriptor>
 struct Binding;
 
-template <typename ... TServices>
-class ServiceScope {
-private:
-    std::tuple<std::optional<TServices>...> Instances_;
-
-public:
-    template<typename TContainer, typename TService, typename TFactory>
-    [[nodiscard]] TService* Resolve(const TContainer& caller) {
-        static_assert(std::is_invocable_r_v<TService, TFactory, TContainer&>);
-
-        auto& optInstance = std::get<std::optional<TService>>(Instances_);
-        if (optInstance.has_value()) {
-            return std::addressof(optInstance.value());
-        } else {
-            TFactory factory;
-            return std::addressof(optInstance.emplace(factory(caller)));
-        }
-    }
-
-    template<typename TService>
-    [[nodiscard]] TService* Resolve() {
-        auto& optInstance = std::get<std::optional<TService>>(Instances_);
-        if (optInstance.has_value()) {
-            return std::addressof(optInstance.value());
-        } else {
-            return std::addressof(optInstance.emplace());
-        }
-    }
-};
-
 template <typename ... TDescriptors>
 class Container {
 private:
     using TThis = Container<TDescriptors...>;
-    using TScope = ServiceScope<typename Binding<TDescriptors>::TService...>;
-    mutable TScope Scope_;
+    mutable std::tuple<std::optional<typename Binding<TDescriptors>::TService>...> Instances_;
 
 public:
     template<typename TDescriptor>
@@ -100,9 +69,33 @@ public:
         using TService = typename TBinding::TService;
 
         if constexpr (std::is_invocable_r_v<TService, TBinding, TThis>) {
-            return Scope_.template Resolve<TThis, TService, TBinding>(*this);
+            return GetOrCreate<TService, TBinding>();
         } else {
-            return Scope_.template Resolve<TService>();
+            return GetOrCreate<TService>();
+        }
+    }
+
+private:
+    template<typename TService, typename TFactory>
+    [[nodiscard]] TService* GetOrCreate() const {
+        static_assert(std::is_invocable_r_v<TService, TFactory, TThis>);
+
+        auto& optInstance = std::get<std::optional<TService>>(Instances_);
+        if (optInstance.has_value()) {
+            return std::addressof(optInstance.value());
+        } else {
+            TFactory factory;
+            return std::addressof(optInstance.emplace(factory(*this)));
+        }
+    }
+
+    template<typename TService>
+    [[nodiscard]] TService* GetOrCreate() const {
+        auto& optInstance = std::get<std::optional<TService>>(Instances_);
+        if (optInstance.has_value()) {
+            return std::addressof(optInstance.value());
+        } else {
+            return std::addressof(optInstance.emplace());
         }
     }
 };
@@ -117,7 +110,10 @@ struct Binding<BDescriptor> {
     using TService = B;
 };
 
-using TServiceContainer = Container<ADescriptor, BDescriptor, CDescriptor>;
+using TServiceContainer = Container<
+        ADescriptor,
+        BDescriptor,
+        CDescriptor>;
 
 template <>
 struct Binding<CDescriptor> {
