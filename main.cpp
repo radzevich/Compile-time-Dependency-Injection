@@ -56,63 +56,165 @@ public:
 template <typename TDescriptor>
 struct Binding;
 
+template <typename TDescriptor>
+struct Singleton {
+    using TType = TDescriptor;
+};
+
+template <typename TDescriptor>
+struct Scoped {
+    using TType = TDescriptor;
+};
+
+template <typename TContainer, typename TDescriptor>
+struct ServiceResolver {
+    using TService = typename Binding<TDescriptor>::TService;
+
+    explicit ServiceResolver(const TContainer& container) : Container_(container) {
+    }
+
+    TService Resolve() {
+        return TContainer::template Create<TService>(Container_);
+    }
+
+    template <typename TFactory>
+    TService Resolve() {
+        return TContainer::template Create<TService, TFactory>(Container_);
+    }
+
+private:
+    const TContainer& Container_;
+};
+
+template <typename TContainer, typename TDescriptor>
+struct ServiceResolver<TContainer, Scoped<TDescriptor>> {
+    using TService = typename Binding<Scoped<TDescriptor>>::TService;
+
+    explicit ServiceResolver(const TContainer& container) : Container_(container) {
+    }
+
+    TService* Resolve() {
+        return TContainer::template GetOrCreate<TService>(Container_);
+    }
+
+    template <typename TFactory>
+    TService* Resolve() {
+        return TContainer::template GetOrCreate<TService, TFactory>(Container_);
+    }
+
+private:
+    const TContainer& Container_;
+};
+
+template <typename TContainer, typename TDescriptor>
+struct ServiceResolver<TContainer, Singleton<TDescriptor>> {
+    using TService = typename Binding<Singleton<TDescriptor>>::TService;
+
+    explicit ServiceResolver(const TContainer&) {
+    }
+
+    TService* Resolve() {
+        return TContainer::template GetOrCreate<TService>(GetContainerSingleton());
+    }
+
+    template <typename TFactory>
+    TService* Resolve() {
+        return TContainer::template GetOrCreate<TService>(GetContainerSingleton());
+    }
+
+private:
+    static const TContainer& GetContainerSingleton() {
+        static TContainer instance;
+        return instance;
+    }
+};
+
 template <typename ... TDescriptors>
 class Container {
 private:
-    using TThis = Container<TDescriptors...>;
+    using TContainer = Container<TDescriptors...>;
+
+private:
     mutable std::tuple<std::optional<typename Binding<TDescriptors>::TService>...> Instances_;
 
 public:
+    Container() = default;
+    ~Container() = default;
+
+    Container(const Container& rhs) = delete;
+    Container& operator=(const Container& rhs) = delete;
+
+    Container(Container&& rhs) noexcept = default;
+    Container& operator=(Container&& rhs) noexcept = default;
+
     template<typename TDescriptor>
     [[nodiscard]] auto Resolve() const -> decltype(auto) {
         using TBinding = Binding<TDescriptor>;
         using TService = typename TBinding::TService;
 
-        if constexpr (std::is_invocable_r_v<TService, TBinding, TThis>) {
-            return GetOrCreate<TService, TBinding>();
+        ServiceResolver<TContainer, TDescriptor> serviceResolver(*this);
+
+        if constexpr (std::is_invocable_r_v<TService, TBinding, TContainer>) {
+            return serviceResolver.template Resolve<TBinding>();
         } else {
-            return GetOrCreate<TService>();
+            return serviceResolver.Resolve();
         }
     }
 
-private:
-    template<typename TService, typename TFactory>
-    [[nodiscard]] TService* GetOrCreate() const {
-        static_assert(std::is_invocable_r_v<TService, TFactory, TThis>);
+    TContainer BeginScope() {
+        return Container<TDescriptors...>();
+    }
 
-        auto& optInstance = std::get<std::optional<TService>>(Instances_);
+    template<typename TService, typename TFactory>
+    [[nodiscard]] static TService* GetOrCreate(const TContainer& container) {
+        static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
+
+        auto& optInstance = std::get<std::optional<TService>>(container.Instances_);
         if (optInstance.has_value()) {
             return std::addressof(optInstance.value());
         } else {
             TFactory factory;
-            return std::addressof(optInstance.emplace(factory(*this)));
+            return std::addressof(optInstance.emplace(factory(container)));
         }
     }
 
     template<typename TService>
-    [[nodiscard]] TService* GetOrCreate() const {
-        auto& optInstance = std::get<std::optional<TService>>(Instances_);
+    [[nodiscard]] static TService* GetOrCreate(const TContainer& container) {
+        auto& optInstance = std::get<std::optional<TService>>(container.Instances_);
         if (optInstance.has_value()) {
             return std::addressof(optInstance.value());
         } else {
             return std::addressof(optInstance.emplace());
         }
     }
+
+    template<typename TService, typename TFactory>
+    [[nodiscard]] static TService Create(const TContainer& container) {
+        static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
+
+        TFactory factory;
+        return factory(container);
+    }
+
+    template<typename TService>
+    [[nodiscard]] static TService Create() {
+        return TService();
+    }
 };
 
 template <>
-struct Binding<ADescriptor> {
+struct Binding<Singleton<ADescriptor>> {
     using TService = A;
 };
 
 template <>
-struct Binding<BDescriptor> {
+struct Binding<Scoped<BDescriptor>> {
     using TService = B;
 };
 
 using TServiceContainer = Container<
-        ADescriptor,
-        BDescriptor,
+        Singleton<ADescriptor>,
+        Scoped<BDescriptor>,
         CDescriptor>;
 
 template <>
@@ -120,8 +222,8 @@ struct Binding<CDescriptor> {
     using TService = C;
 
     auto operator()(const TServiceContainer& container) {
-        auto a = container.Resolve<ADescriptor>();
-        auto b = container.Resolve<BDescriptor>();
+        auto a = container.Resolve<Singleton<ADescriptor>>();
+        auto b = container.Resolve<Scoped<BDescriptor>>();
 
         return C(a, b);
     }
@@ -131,14 +233,14 @@ struct Binding<CDescriptor> {
 int main() {
     TServiceContainer ioc;
 
-    auto a = ioc.Resolve<ADescriptor>();
+    auto a = ioc.Resolve<Singleton<ADescriptor>>();
     a->Whoami();
 
-    auto b = ioc.Resolve<BDescriptor>();
+    auto b = ioc.Resolve<Scoped<BDescriptor>>();
     b->Whoami();
 
     auto c = ioc.Resolve<CDescriptor>();
-    c->Whoami();
+    c.Whoami();
 
     return 0;
 }
