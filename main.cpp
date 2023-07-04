@@ -70,12 +70,12 @@ struct ServiceResolver {
     }
 
     TService Resolve() {
-        return TContainer::template Create<TService>(Container_);
+        return Container_.template Create<TService>();
     }
 
     template <typename TFactory>
     TService Resolve() {
-        return TContainer::template Create<TService, TFactory>(Container_);
+        return Container_.template Create<TService, TFactory>();
     }
 
 private:
@@ -90,12 +90,12 @@ struct ServiceResolver<TContainer, Scoped<TDescriptor>> {
     }
 
     TService* Resolve() {
-        return TContainer::template GetOrCreate<TService>(Container_);
+        return Container_.template GetOrCreate<TService>();
     }
 
     template <typename TFactory>
     TService* Resolve() {
-        return TContainer::template GetOrCreate<TService, TFactory>(Container_);
+        return Container_.template GetOrCreate<TService, TFactory>();
     }
 
 private:
@@ -110,12 +110,12 @@ struct ServiceResolver<TContainer, Singleton<TDescriptor>> {
     }
 
     TService* Resolve() {
-        return TContainer::template GetOrCreate<TService>(GetContainerSingleton());
+        return GetContainerSingleton().template GetOrCreate<TService>();
     }
 
     template <typename TFactory>
     TService* Resolve() {
-        return TContainer::template GetOrCreate<TService>(GetContainerSingleton());
+        return GetContainerSingleton().template GetOrCreate<TService>();
     }
 
 private:
@@ -143,6 +143,10 @@ public:
     Container(Container&& rhs) noexcept = default;
     Container& operator=(Container&& rhs) noexcept = default;
 
+    static TContainer BeginScope() {
+        return Container<TDescriptors...>();
+    }
+
     template<typename TDescriptor, typename TBinding = Binding<TDescriptor>>
     [[nodiscard]] auto Resolve() const -> decltype(auto) {
         ServiceResolver<TContainer, TDescriptor> serviceResolver(*this);
@@ -154,26 +158,22 @@ public:
         }
     }
 
-    TContainer BeginScope() {
-        return Container<TDescriptors...>();
-    }
-
     template<typename TService, typename TFactory>
-    [[nodiscard]] static TService* GetOrCreate(const TContainer& container) {
+    [[nodiscard]] TService* GetOrCreate() const {
         static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
 
-        auto& optInstance = std::get<std::optional<TService>>(container.Instances_);
+        auto& optInstance = std::get<std::optional<TService>>(Instances_);
         if (optInstance.has_value()) {
             return std::addressof(optInstance.value());
         } else {
             TFactory factory;
-            return std::addressof(optInstance.emplace(factory(container)));
+            return std::addressof(optInstance.emplace(factory(*this)));
         }
     }
 
     template<typename TService>
-    [[nodiscard]] static TService* GetOrCreate(const TContainer& container) {
-        auto& optInstance = std::get<std::optional<TService>>(container.Instances_);
+    [[nodiscard]] TService* GetOrCreate() const {
+        auto& optInstance = std::get<std::optional<TService>>(Instances_);
         if (optInstance.has_value()) {
             return std::addressof(optInstance.value());
         } else {
@@ -182,15 +182,15 @@ public:
     }
 
     template<typename TService, typename TFactory>
-    [[nodiscard]] static TService Create(const TContainer& container) {
+    [[nodiscard]] TService Create() const {
         static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
 
         TFactory factory;
-        return factory(container);
+        return factory(*this);
     }
 
     template<typename TService>
-    [[nodiscard]] static TService Create() {
+    [[nodiscard]] TService Create() const {
         return TService();
     }
 };
