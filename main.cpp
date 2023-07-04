@@ -57,14 +57,10 @@ template <typename TDescriptor>
 struct Binding;
 
 template <typename TDescriptor>
-struct Singleton {
-    using TType = TDescriptor;
-};
+struct Singleton {};
 
 template <typename TDescriptor>
-struct Scoped {
-    using TType = TDescriptor;
-};
+struct Scoped {};
 
 template <typename TContainer, typename TDescriptor>
 struct ServiceResolver {
@@ -88,7 +84,7 @@ private:
 
 template <typename TContainer, typename TDescriptor>
 struct ServiceResolver<TContainer, Scoped<TDescriptor>> {
-    using TService = typename Binding<Scoped<TDescriptor>>::TService;
+    using TService = typename Binding<TDescriptor>::TService;
 
     explicit ServiceResolver(const TContainer& container) : Container_(container) {
     }
@@ -108,7 +104,7 @@ private:
 
 template <typename TContainer, typename TDescriptor>
 struct ServiceResolver<TContainer, Singleton<TDescriptor>> {
-    using TService = typename Binding<Singleton<TDescriptor>>::TService;
+    using TService = typename Binding<TDescriptor>::TService;
 
     explicit ServiceResolver(const TContainer&) {
     }
@@ -147,14 +143,11 @@ public:
     Container(Container&& rhs) noexcept = default;
     Container& operator=(Container&& rhs) noexcept = default;
 
-    template<typename TDescriptor>
+    template<typename TDescriptor, typename TBinding = Binding<TDescriptor>>
     [[nodiscard]] auto Resolve() const -> decltype(auto) {
-        using TBinding = Binding<TDescriptor>;
-        using TService = typename TBinding::TService;
-
         ServiceResolver<TContainer, TDescriptor> serviceResolver(*this);
 
-        if constexpr (std::is_invocable_r_v<TService, TBinding, TContainer>) {
+        if constexpr (std::is_invocable_v<TBinding, TContainer>) {
             return serviceResolver.template Resolve<TBinding>();
         } else {
             return serviceResolver.Resolve();
@@ -203,18 +196,18 @@ public:
 };
 
 template <>
-struct Binding<Singleton<ADescriptor>> {
+struct Binding<ADescriptor> {
     using TService = A;
 };
 
 template <>
-struct Binding<Scoped<BDescriptor>> {
+struct Binding<BDescriptor> {
     using TService = B;
 };
 
 using TServiceContainer = Container<
-        Singleton<ADescriptor>,
-        Scoped<BDescriptor>,
+        ADescriptor,
+        BDescriptor,
         CDescriptor>;
 
 template <>
