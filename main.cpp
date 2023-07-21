@@ -1,16 +1,8 @@
-#include <iostream>
-#include <optional>
-
+#include "bootstrap.h"
 #include "descriptors.h"
-#include "lib/ioc.h"
-
-using TServiceContainer = IOC::Container<
-        ADescriptor,
-        BDescriptor,
-        CDescriptor>;
 
 int main() {
-    TServiceContainer ioc;
+    TContainer ioc;
 
     auto a = ioc.Resolve<IOC::Singleton<ADescriptor>>();
     a->Whoami();

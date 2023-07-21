@@ -1,6 +1,8 @@
-#include "lib/ioc.h"
-#include "descriptors.h"
-#include "src/service.h"
+#pragma once
+
+#include "service.h"
+#include "../descriptors.h"
+#include "../lib/ioc.h"
 
 template <>
 struct IOC::Binding<ADescriptor> {
