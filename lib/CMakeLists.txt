@@ -3,4 +3,4 @@ project(IOC)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(IOC_lib STATIC ioc.cpp)
+add_library(IOC_lib STATIC ioc.cpp ioc_2.cpp ioc_2.h util.cpp util.h)

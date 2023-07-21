@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(lib)
 
-add_executable(IOC main.cpp src/service.cpp src/service.h bootstrap.h src/booststrap.h descriptors.h)
+add_executable(IOC main.cpp src/service.cpp src/service.h)
