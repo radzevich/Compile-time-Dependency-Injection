@@ -45,7 +45,7 @@ namespace IOC2 {
         using TService = typename Binding<TDescriptor>::TService;
     public:
         template <typename TThisContainer>
-        auto ResolveService(const TThisContainer& container) const -> decltype(auto) {
+        auto Resolve(const TThisContainer& container) const -> decltype(auto) {
             if constexpr (std::is_invocable_v<Binding<TDescriptor>, TThisContainer>) {
                 return Binding<TDescriptor>()(container);
             } else {
@@ -61,7 +61,7 @@ namespace IOC2 {
         template <typename TRequestedDescriptor>
         auto Resolve() const -> decltype(auto) {
             const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>>(*this);
-            return desiredServiceCollection.ResolveService(*this);
+            return desiredServiceCollection.Resolve(*this);
         }
     };
 
