@@ -15,7 +15,11 @@ namespace IOC2 {
 
     struct Singleton {};
 
+    struct LazySingleton {};
+
     struct Scoped {};
+
+    struct LazyScoped {};
 
     struct Transient {};
 
@@ -41,6 +45,23 @@ namespace IOC2 {
         constexpr TService GetOrCreate(const TContainer& container) {
             return ServiceFactory<TService>::Create(container);
         }
+    };
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, LazyScoped> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        constexpr TService* GetOrCreate(const TContainer& container) {
+            if (!Instance_.has_value()) [[unlikely]] {
+                Instance_ = ServiceFactory<TService>::Create(container);
+            }
+
+            return std::addressof(Instance_.value());
+        }
+
+    private:
+        std::optional<TService> Instance_;
     };
 
     template <typename TDescriptor>
@@ -130,5 +151,15 @@ namespace IOC2 {
         }
     };
 
+    template <typename ...TInnerDescriptors, typename ...TDescriptors>
+    class ServiceCollection<ServiceCollection<TInnerDescriptors...>, TDescriptors...>
+            : public ServiceCollection<TInnerDescriptors...>
+            , public ServiceCollection<TDescriptors...>
+    {};
+
+    template <typename ...TInnerDescriptors>
+    class ServiceCollection<ServiceCollection<TInnerDescriptors...>>
+            : public ServiceCollection<TInnerDescriptors...>
+    {};
 
 }
