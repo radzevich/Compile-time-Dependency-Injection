@@ -1,13 +1,16 @@
 #include "lib/ioc_2.h"
 
 void DoIoc2() {
-    IOC2::ServiceCollection<ADescriptor, BDescriptor, CDescriptor> ioc;
+    IOC2::ServiceCollection<
+            ADescriptor,
+            BDescriptor,
+            CDescriptor> ioc;
 
     auto a = ioc.Resolve<ADescriptor>();
-    a.Whoami();
+    a->Whoami();
 
     auto b = ioc.Resolve<BDescriptor>();
-    b.Whoami();
+    b->Whoami();
 
     auto c = ioc.Resolve<CDescriptor>();
     c.Whoami();

@@ -3,6 +3,8 @@
 #include "util.h"
 #include "../src/service.h"
 
+#include <optional>
+
 struct ADescriptor {};
 
 struct BDescriptor {};
@@ -11,29 +13,91 @@ struct CDescriptor {};
 
 namespace IOC2 {
 
+    struct Singleton {};
+
+    struct Scoped {};
+
+    struct Transient {};
+
     template <typename TDescriptor>
     struct Binding;
+
+    template <typename TService>
+    struct ServiceFactory {
+        template <typename TContainer>
+        static constexpr TService Create(const TContainer&) {
+            return TService();
+        }
+    };
+
+    template <typename TService, typename TLifetime = void>
+    struct LifetimeManager;
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Transient> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        constexpr TService GetOrCreate(const TContainer& container) {
+            return ServiceFactory<TService>::Create(container);
+        }
+    };
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Scoped> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        constexpr TService* GetOrCreate(const TContainer& container) {
+            if (!Instance_.has_value()) [[unlikely]] {
+                Instance_ = ServiceFactory<TService>::Create(container);
+            }
+
+            return std::addressof(Instance_.value());
+        }
+
+    private:
+        std::optional<TService> Instance_;
+    };
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Singleton> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        TService* GetOrCreate(const TContainer& container) {
+            static TService instance = ServiceFactory<TService>::Create(container);
+            return std::addressof(instance);
+        }
+    };
+
 
     template <>
     struct IOC2::Binding<ADescriptor> {
         using TService = A;
+        using TLifetime = Singleton;
     };
 
     template <>
     struct IOC2::Binding<BDescriptor> {
         using TService = B;
+        using TLifetime = Scoped;
     };
 
     template <>
     struct IOC2::Binding<CDescriptor> {
         using TService = C;
+        using TLifetime = Transient;
+    };
 
-        template <typename TServiceContainer>
-        auto operator()(const TServiceContainer& container) {
-            auto a = container.template Resolve<ADescriptor>();
-            auto b = container.template Resolve<BDescriptor>();
+    template <>
+    struct ServiceFactory<C> {
+        template <typename TContainer>
+        static C Create(const TContainer& container) {
+            auto* a = container.template Resolve<ADescriptor>();
+            auto* b = container.template Resolve<BDescriptor>();
 
-            return C(&a, &b);
+            return C(a, b);
         }
     };
 
@@ -42,15 +106,16 @@ namespace IOC2 {
 
     template <typename TDescriptor>
     class ServiceCollection<TDescriptor> {
-        using TService = typename Binding<TDescriptor>::TService;
+        using TLifetime = typename Binding<TDescriptor>::TLifetime;
+        using TLifetimeManager = LifetimeManager<TDescriptor, TLifetime>;
+
+    private:
+        mutable TLifetimeManager LifetimeManager_;
+
     public:
         template <typename TThisContainer>
         auto Resolve(const TThisContainer& container) const -> decltype(auto) {
-            if constexpr (std::is_invocable_v<Binding<TDescriptor>, TThisContainer>) {
-                return Binding<TDescriptor>()(container);
-            } else {
-                return TService();
-            }
+            return LifetimeManager_.template GetOrCreate(container);
         }
     };
 
