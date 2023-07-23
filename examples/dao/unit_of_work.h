@@ -49,3 +49,13 @@ namespace Example::Dao {
 }
 
 #include "unit_of_work.cpp"
+
+template<typename ...TRepositories>
+struct IOC::ServiceFactory<Example::Dao::UnitOfWork<TRepositories...>> {
+    static Example::Dao::UnitOfWork<TRepositories...> Create(const auto& container) {
+        return {
+            container.template Resolve<Example::Dao::EmployeeRepositoryDescriptor>(),
+            container.template Resolve<Example::Dao::DepartmentRepositoryDescriptor>()
+        };
+    }
+};

@@ -85,8 +85,7 @@ namespace IOC {
     public:
         template <typename TRequestedDescriptor>
         auto Resolve() const -> decltype(auto) {
-            const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this);
-            return desiredServiceCollection.ResolveService(*this);
+            return static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this).ResolveService(*this);
         }
     };
 
@@ -94,10 +93,20 @@ namespace IOC {
     class ServiceCollection<ServiceCollection<TInnerDescriptors...>, TDescriptors...>
         : public ServiceCollection<TInnerDescriptors...>
         , public ServiceCollection<TDescriptors...> {
+    public:
+        template <typename TRequestedDescriptor>
+        auto Resolve() const -> decltype(auto) {
+            return static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this).ResolveService(*this);
+        }
     };
 
     template <typename ...TInnerDescriptors>
     class ServiceCollection<ServiceCollection<TInnerDescriptors...>> : public ServiceCollection<TInnerDescriptors...> {
+    public:
+        template <typename TRequestedDescriptor>
+        auto Resolve() const -> decltype(auto) {
+            return static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this).ResolveService(*this);
+        }
     };
 
 }

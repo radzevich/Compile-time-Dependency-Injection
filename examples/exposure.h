@@ -7,7 +7,7 @@
 namespace Example {
 
     using TContainer = class IOC::ServiceCollection<
-            Services::UnitOfWorkDescriptor,
+            Services::TContainer,
             Dao::TContainer>;
 
 }
