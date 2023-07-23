@@ -3,23 +3,23 @@
 #include "../domain//company.h"
 #include "../domain/employee.h"
 #include "../utils/enumerable.h"
-#include "dependency_exposure.h"
+#include "exposure.h"
 #include <concepts>
 #include <string>
 
 namespace Example::Dao {
 
     template<class TEmployeeRepository>
-    concept EmployeeRepository = requires(TEmployeeRepository &repository, Employee employee) {
-        { repository.Get(employee.Id) } -> std::same_as<Employee>;
+    concept EmployeeRepository = requires(TEmployeeRepository &repository, Domain::Employee employee) {
+        { repository.Get(employee.Id) } -> std::same_as<Domain::Employee>;
         { repository.Add(employee) } -> std::same_as<decltype(employee.Id)>;
         { repository.Update(employee) };
         { repository.Remove(employee.Id) };
     };
 
     template<class TCompanyRepository>
-    concept CompanyRepository = requires(TCompanyRepository &repository, Company company) {
-        { repository.Get(company.Id) } -> std::same_as<Company>;
+    concept CompanyRepository = requires(TCompanyRepository &repository, Domain::Company company) {
+        { repository.Get(company.Id) } -> std::same_as<Domain::Company>;
         { repository.Add(company) } -> std::same_as<decltype(company.Id)>;
         { repository.Update(company) };
         { repository.Remove(company.Id) };
@@ -36,7 +36,7 @@ namespace Example::Dao {
 
         int AddCompany(const std::string &companyName);
         int AddEmployee(int companyId, const std::string &employeeName);
-        Example::Util::Enumerable<Employee> GetCompanyEmployees(int companyId);
+        Example::Util::Enumerable<Domain::Employee> GetCompanyEmployees(int companyId);
         void RotateEmployee(int fromCompanyId, int toCompanyId, int employeeId);
         void RemoveEmployee(int companyId, int employeeId);
     };

@@ -3,8 +3,12 @@
 #include <string>
 #include <vector>
 
-struct Company {
-    int Id;
-    std::string Name;
-    std::vector<int> Employees;
-};
+namespace Example::Domain {
+
+    struct Company {
+        int Id;
+        std::string Name;
+        std::vector<int> Employees;
+    };
+
+}

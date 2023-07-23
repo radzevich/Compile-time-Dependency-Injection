@@ -15,8 +15,7 @@ namespace IOC2 {
 
     template <typename TService>
     struct ServiceFactory {
-        template <typename TContainer>
-        static constexpr TService Create(const TContainer&) {
+        static constexpr TService Create(const auto&) {
             return TService();
         }
     };

@@ -4,6 +4,7 @@
 
 namespace Example::Dao {
 
+    using namespace Example::Domain;
     using namespace Example::Util;
 
     template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>

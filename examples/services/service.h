@@ -6,14 +6,14 @@
 #include <concepts>
 
 template <class TEmployeeRepository>
-concept EmployeeRepository = requires(TEmployeeRepository& repository, Employee employee) {
-    { repository.GetEmployee() } -> std::same_as<Employee>;
+concept EmployeeRepository = requires(TEmployeeRepository& repository, Example::Domain::Employee employee) {
+    { repository.GetEmployee() } -> std::same_as<Example::Domain::Employee>;
     { repository.SaveEmployee(employee) };
 };
 
 template <class TCompanyRepository>
-concept CompanyRepository = requires(TCompanyRepository& repository, Company company) {
-    { repository.GetCompany() } -> std::same_as<Company>;
+concept CompanyRepository = requires(TCompanyRepository& repository, Example::Domain::Company company) {
+    { repository.GetCompany() } -> std::same_as<Example::Domain::Company>;
     { repository.SaveCompany(company) };
 };
 

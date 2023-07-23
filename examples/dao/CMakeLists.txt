@@ -3,4 +3,4 @@ project(IOC)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(IOC_example_dao STATIC dependency_exposure.h repository.cpp repository.h unit_of_work.h)
+add_library(IOC_example_dao STATIC exposure.h repository.cpp repository.h unit_of_work.h)
