@@ -2,22 +2,12 @@
 
 #include "examples/dao/bootstrap.h"
 
-//void DoIoc2() {
-//    auto container = IOC2::Container<ADescriptor, BDescriptor, CDescriptor>();
-//
-//    auto a = container.Resolve<ADescriptor>();
-//    a->Whoami();
-//
-//    auto b = container.Resolve<BDescriptor>();
-//    b->Whoami();
-//
-//    auto c = container.Resolve<CDescriptor>();
-//    c.Whoami();
-//}
-
 int main() {
     TDaoContainer container;
     auto uow = container.Resolve<UnitOfWorkDescriptor>();
+    auto companyId = uow->AddCompany("Good Company");
+    std::cout << "WORKER: " << uow->AddEmployee(companyId, "Vasya") << std::endl;
+    std::cout << "WORKER: " << uow->AddEmployee(companyId, "Petya") << std::endl;
 
     return 0;
 }

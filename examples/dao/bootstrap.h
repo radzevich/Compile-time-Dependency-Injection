@@ -24,38 +24,6 @@ struct IOC2::Binding<UnitOfWorkDescriptor> {
             IOC2::Binding<CompanyRepositoryDescriptor>::TService>;
 };
 
-template <typename ...TRepositories>
-struct IOC2::ServiceFactory<UnitOfWork<TRepositories...>> {
-    template <typename TContainer>
-    static UnitOfWork<TRepositories...> Create(const TContainer& container) {
-        auto* employeeRepository = container.template Resolve<EmployeeRepositoryDescriptor>();
-        auto* companyRepository = container.template Resolve<CompanyRepositoryDescriptor>();
-
-        return UnitOfWork(employeeRepository, companyRepository);
-    }
-};
-
-template <>
-struct IOC2::ServiceFactory<Repository<Employee>> {
-    template <typename TContainer>
-    static Repository<Employee> Create(const TContainer&) {
-        return {};
-    }
-};
-
-template <>
-struct IOC2::ServiceFactory<Repository<Company>> {
-    template <typename TContainer>
-    static Repository<Employee> Create(const TContainer&) {
-        return {};
-    }
-};
-
-//template class IOC2::ServiceCollection<
-//        EmployeeRepositoryDescriptor,
-//        CompanyRepositoryDescriptor,
-//        UnitOfWorkDescriptor>;
-
 using TDaoContainer = class IOC2::ServiceCollection<
         EmployeeRepositoryDescriptor,
         CompanyRepositoryDescriptor,

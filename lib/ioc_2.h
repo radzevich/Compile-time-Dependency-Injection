@@ -22,22 +22,8 @@ namespace IOC2 {
     template <typename TDescriptor>
     struct Binding;
 
-    // Forward declaration for the primary template
-    template <typename TService, typename ...TArgs>
-    struct ServiceFactory;
-
-    // Specialization for the case where TService is a template type
-    template <template<typename...> class TService, typename ...TArgs>
-    struct ServiceFactory<TService<TArgs...>, TArgs...> {
-        template <typename TContainer>
-        static constexpr TService<TArgs...> Create(const TContainer&) {
-            return TService<TArgs...>();
-        }
-    };
-
-    // Specialization for the case where TService is a non-template type
     template <typename TService>
-    struct ServiceFactory<TService, void> {
+    struct ServiceFactory {
         template <typename TContainer>
         static constexpr TService Create(const TContainer&) {
             return TService();

@@ -32,9 +32,10 @@ private:
 public:
     UnitOfWork(TEmployeeRepository* employeeRepository, TCompanyRepository* companyRepository);
 
-    void AddCompany(const std::string& companyName);
+    int AddCompany(const std::string& companyName);
     int AddEmployee(int companyId, const std::string& employeeName);
     void RotateEmployee(int fromCompanyId, int toCompanyId, int employeeId);
     void RemoveEmployee(int companyId, int employeeId);
 };
 
+#include "unit_of_work.cpp"

@@ -3,8 +3,8 @@
 #include <algorithm>
 
 template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
-void UnitOfWork<TEmployeeRepository, TCompanyRepository>::AddCompany(const std::string& companyName) {
-    return CompanyRepository_->Update({
+int UnitOfWork<TEmployeeRepository, TCompanyRepository>::AddCompany(const std::string& companyName) {
+    return CompanyRepository_->Add({
         .Name = companyName,
     });
 }
@@ -21,6 +21,8 @@ int UnitOfWork<TEmployeeRepository, TCompanyRepository>::AddEmployee(int company
     auto company = CompanyRepository_->Get(companyId);
     company.Employees.push_back(employeeId);
     CompanyRepository_->Update(std::move(company));
+
+    return employeeId;
 }
 
 template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
