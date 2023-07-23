@@ -2,30 +2,34 @@
 
 #include <vector>
 
-template <typename TData>
-class Repository {
-private:
-    std::vector<TData> Data_;
+namespace Example::Dao {
 
-public:
-    TData Get(int id) const {
-        return Data_[id];
-    }
+    template<typename TData>
+    class Repository {
+    private:
+        std::vector<TData> Data_;
 
-    void Update(TData update) requires requires { update.Id; } {
-        Data_[update.Id] = std::move(update);
-    }
+    public:
+        TData Get(int id) const {
+            return Data_[id];
+        }
 
-    int Add(TData data) requires requires { data.Id; } {
-        int id = Data_.size();
+        void Update(TData update) requires requires { update.Id; } {
+            Data_[update.Id] = std::move(update);
+        }
 
-        data.Id = id;
-        Data_.emplace_back(std::move(data));
+        int Add(TData data) requires requires { data.Id; } {
+            int id = Data_.size();
 
-        return id;
-    }
+            data.Id = id;
+            Data_.emplace_back(std::move(data));
 
-    void Remove(int id) {
-        Data_.erase(std::next(Data_.begin(), id));
-    }
-};
+            return id;
+        }
+
+        void Remove(int id) {
+            Data_.erase(std::next(Data_.begin(), id));
+        }
+    };
+
+}

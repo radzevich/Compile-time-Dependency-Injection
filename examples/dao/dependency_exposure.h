@@ -4,19 +4,25 @@
 #include "unit_of_work.h"
 #include "repository.h"
 
-struct EmployeeRepositoryDescriptor {};
+namespace Example::Dao {
 
-struct CompanyRepositoryDescriptor {};
+    struct EmployeeRepositoryDescriptor {
+    };
 
-struct UnitOfWorkDescriptor {};
+    struct CompanyRepositoryDescriptor {
+    };
 
-template <typename ...TRepositories>
-struct IOC2::ServiceFactory<UnitOfWork<TRepositories...>> {
-    template <typename TContainer>
-    static UnitOfWork<TRepositories...> Create(const TContainer& container) {
-        auto* employeeRepository = container.template Resolve<EmployeeRepositoryDescriptor>();
-        auto* companyRepository = container.template Resolve<CompanyRepositoryDescriptor>();
+    struct UnitOfWorkDescriptor {
+    };
+}
 
-        return UnitOfWork(employeeRepository, companyRepository);
+template<typename ...TRepositories>
+struct IOC2::ServiceFactory<Example::Dao::UnitOfWork<TRepositories...>> {
+    template<typename TContainer>
+    static Example::Dao::UnitOfWork<TRepositories...> Create(const TContainer &container) {
+        auto *employeeRepository = container.template Resolve<Example::Dao::EmployeeRepositoryDescriptor>();
+        auto *companyRepository = container.template Resolve<Example::Dao::CompanyRepositoryDescriptor>();
+
+        return Example::Dao::UnitOfWork(employeeRepository, companyRepository);
     }
 };

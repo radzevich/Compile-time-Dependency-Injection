@@ -3,28 +3,33 @@
 #include "../../lib/ioc_2.h"
 #include "dependency_exposure.h"
 #include "repository.h"
+#include "unit_of_work.h"
 
 template<>
-struct IOC2::Binding<EmployeeRepositoryDescriptor> {
+struct IOC2::Binding<Example::Dao::EmployeeRepositoryDescriptor> {
     using TLifetime = Scoped;
-    using TService = Repository<Employee>;
+    using TService = Example::Dao::Repository<Employee>;
 };
 
 template<>
-struct IOC2::Binding<CompanyRepositoryDescriptor> {
+struct IOC2::Binding<Example::Dao::CompanyRepositoryDescriptor> {
     using TLifetime = Scoped;
-    using TService = Repository<Company>;
+    using TService = Example::Dao::Repository<Company>;
 };
 
 template<>
-struct IOC2::Binding<UnitOfWorkDescriptor> {
+struct IOC2::Binding<Example::Dao::UnitOfWorkDescriptor> {
     using TLifetime = Scoped;
-    using TService = UnitOfWork<
-            IOC2::Binding<EmployeeRepositoryDescriptor>::TService,
-            IOC2::Binding<CompanyRepositoryDescriptor>::TService>;
+    using TService = Example::Dao::UnitOfWork<
+            IOC2::Binding<Example::Dao::EmployeeRepositoryDescriptor>::TService,
+            IOC2::Binding<Example::Dao::CompanyRepositoryDescriptor>::TService>;
 };
 
-using TDaoContainer = class IOC2::ServiceCollection<
-        EmployeeRepositoryDescriptor,
-        CompanyRepositoryDescriptor,
-        UnitOfWorkDescriptor>;
+namespace Example::Dao {
+
+    using TContainer = class IOC2::ServiceCollection<
+            EmployeeRepositoryDescriptor,
+            CompanyRepositoryDescriptor,
+            UnitOfWorkDescriptor>;
+
+}
