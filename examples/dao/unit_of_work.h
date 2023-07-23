@@ -2,6 +2,7 @@
 
 #include "../domain//company.h"
 #include "../domain/employee.h"
+#include "../utils/enumerable.h"
 #include "dependency_exposure.h"
 #include <concepts>
 #include <string>
@@ -35,6 +36,7 @@ namespace Example::Dao {
 
         int AddCompany(const std::string &companyName);
         int AddEmployee(int companyId, const std::string &employeeName);
+        Example::Util::Enumerable<Employee> GetCompanyEmployees(int companyId);
         void RotateEmployee(int fromCompanyId, int toCompanyId, int employeeId);
         void RemoveEmployee(int companyId, int employeeId);
     };

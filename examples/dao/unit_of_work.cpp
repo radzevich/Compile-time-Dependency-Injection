@@ -4,6 +4,8 @@
 
 namespace Example::Dao {
 
+    using namespace Example::Util;
+
     template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
     int UnitOfWork<TEmployeeRepository, TCompanyRepository>::AddCompany(const std::string &companyName) {
         return CompanyRepository_->Add({
@@ -65,9 +67,17 @@ namespace Example::Dao {
     }
 
     template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
+    Enumerable<Employee> UnitOfWork<TEmployeeRepository, TCompanyRepository>::GetCompanyEmployees(int companyId) {
+        auto company = CompanyRepository_->Get(companyId);
+        for (auto employeeId : company.Employees) {
+            co_yield EmployeeRepository_->Get(employeeId);
+        }
+    }
+
+    template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
     UnitOfWork<TEmployeeRepository, TCompanyRepository>::UnitOfWork(TEmployeeRepository* employeeRepository,
                                                                     TCompanyRepository* companyRepository)
-        : EmployeeRepository_(employeeRepository)
-        , CompanyRepository_(companyRepository) {
+                                                                    : EmployeeRepository_(employeeRepository)
+                                                                    , CompanyRepository_(companyRepository) {
     }
 }

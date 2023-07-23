@@ -7,9 +7,14 @@ using TContainer = class IOC2::ServiceCollection<Example::Dao::TContainer>;
 int main() {
     TContainer container;
     auto uow = container.Resolve<Example::Dao::UnitOfWorkDescriptor>();
+
     auto companyId = uow->AddCompany("Good Company");
-    std::cout << "WORKER: " << uow->AddEmployee(companyId, "Vasya") << std::endl;
-    std::cout << "WORKER: " << uow->AddEmployee(companyId, "Petya") << std::endl;
+    uow->AddEmployee(companyId, "Vasya");
+    uow->AddEmployee(companyId, "Petya");
+
+    for (auto employee : uow->GetCompanyEmployees(companyId)) {
+        std::cout << "WORKER: " << employee.Name << std::endl;
+    }
 
     return 0;
 }
