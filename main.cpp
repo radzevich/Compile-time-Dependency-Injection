@@ -1,35 +1,23 @@
 #include "lib/ioc_2.h"
 
-template struct IOC2::ServiceCollection<
-        ADescriptor,
-        BDescriptor>;
+#include "examples/dao/bootstrap.h"
 
-using TContainer1 = IOC2::ServiceCollection<
-        ADescriptor,
-        BDescriptor>;
-
-template struct IOC2::ServiceCollection<
-        TContainer1,
-        CDescriptor>;
-
-void DoIoc2() {
-    IOC2::ServiceCollection<
-            ADescriptor,
-            BDescriptor,
-            CDescriptor> ioc;
-
-    auto a = ioc.Resolve<ADescriptor>();
-    a->Whoami();
-
-    auto b = ioc.Resolve<BDescriptor>();
-    b->Whoami();
-
-    auto c = ioc.Resolve<CDescriptor>();
-    c.Whoami();
-}
+//void DoIoc2() {
+//    auto container = IOC2::Container<ADescriptor, BDescriptor, CDescriptor>();
+//
+//    auto a = container.Resolve<ADescriptor>();
+//    a->Whoami();
+//
+//    auto b = container.Resolve<BDescriptor>();
+//    b->Whoami();
+//
+//    auto c = container.Resolve<CDescriptor>();
+//    c.Whoami();
+//}
 
 int main() {
-    DoIoc2();
+    TDaoContainer container;
+    auto uow = container.Resolve<UnitOfWorkDescriptor>();
 
     return 0;
 }

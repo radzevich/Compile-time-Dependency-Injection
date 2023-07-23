@@ -15,19 +15,29 @@ namespace IOC2 {
 
     struct Singleton {};
 
-    struct LazySingleton {};
-
     struct Scoped {};
-
-    struct LazyScoped {};
 
     struct Transient {};
 
     template <typename TDescriptor>
     struct Binding;
 
+    // Forward declaration for the primary template
+    template <typename TService, typename ...TArgs>
+    struct ServiceFactory;
+
+    // Specialization for the case where TService is a template type
+    template <template<typename...> class TService, typename ...TArgs>
+    struct ServiceFactory<TService<TArgs...>, TArgs...> {
+        template <typename TContainer>
+        static constexpr TService<TArgs...> Create(const TContainer&) {
+            return TService<TArgs...>();
+        }
+    };
+
+    // Specialization for the case where TService is a non-template type
     template <typename TService>
-    struct ServiceFactory {
+    struct ServiceFactory<TService, void> {
         template <typename TContainer>
         static constexpr TService Create(const TContainer&) {
             return TService();
@@ -45,23 +55,6 @@ namespace IOC2 {
         constexpr TService GetOrCreate(const TContainer& container) {
             return ServiceFactory<TService>::Create(container);
         }
-    };
-
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, LazyScoped> {
-        using TService = typename Binding<TDescriptor>::TService;
-
-        template<typename TContainer>
-        constexpr TService* GetOrCreate(const TContainer& container) {
-            if (!Instance_.has_value()) [[unlikely]] {
-                Instance_ = ServiceFactory<TService>::Create(container);
-            }
-
-            return std::addressof(Instance_.value());
-        }
-
-    private:
-        std::optional<TService> Instance_;
     };
 
     template <typename TDescriptor>
@@ -146,7 +139,7 @@ namespace IOC2 {
     public:
         template <typename TRequestedDescriptor>
         auto Resolve() const -> decltype(auto) {
-            const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>>(*this);
+            const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this);
             return desiredServiceCollection.Resolve(*this);
         }
     };
