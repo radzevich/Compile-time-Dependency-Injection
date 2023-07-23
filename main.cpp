@@ -8,12 +8,12 @@ int main() {
     TContainer container;
     auto uow = container.Resolve<Example::Dao::UnitOfWorkDescriptor>();
 
-    auto companyId = uow.AddCompany("Good Company");
-    uow.AddEmployee(companyId, "Vasya");
-    uow.AddEmployee(companyId, "Petya");
+    auto departmentId = uow.AddDepartment("Good Department");
+    uow.AddEmployee(departmentId, "Vasya");
+    uow.AddEmployee(departmentId, "Petya");
 
-    for (auto employee : uow.GetCompanyEmployees(companyId)) {
-        std::cout << "WORKER: " << employee.Id << " " << employee.Name << " works at " << employee.CompanyId << std::endl;
+    for (auto employee : uow.GetDepartmentEmployees(departmentId)) {
+        std::cout << "WORKER: " << employee.Id << " " << employee.Name << " works at " << employee.DepartmentId << std::endl;
     }
 
     return 0;

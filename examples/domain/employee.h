@@ -6,7 +6,7 @@ namespace Example::Domain {
 
     struct Employee {
         int Id;
-        int CompanyId;
+        int DepartmentId;
         std::string Name;
     };
 

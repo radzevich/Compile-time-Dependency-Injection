@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../domain//company.h"
+#include "../domain//department.h"
 #include "../domain/employee.h"
 #include "../utils/enumerable.h"
 #include "exposure.h"
@@ -17,28 +17,28 @@ namespace Example::Dao {
         { repository.Remove(employee.Id) };
     };
 
-    template<class TCompanyRepository>
-    concept CompanyRepository = requires(TCompanyRepository &repository, Domain::Company company) {
-        { repository.Get(company.Id) } -> std::same_as<Domain::Company>;
-        { repository.Add(company) } -> std::same_as<decltype(company.Id)>;
-        { repository.Update(company) };
-        { repository.Remove(company.Id) };
+    template<class TDepartmentRepository>
+    concept DepartmentRepository = requires(TDepartmentRepository &repository, Domain::Department department) {
+        { repository.Get(department.Id) } -> std::same_as<Domain::Department>;
+        { repository.Add(department) } -> std::same_as<decltype(department.Id)>;
+        { repository.Update(department) };
+        { repository.Remove(department.Id) };
     };
 
-    template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
+    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
     class UnitOfWork {
     private:
         TEmployeeRepository* EmployeeRepository_;
-        TCompanyRepository* CompanyRepository_;
+        TDepartmentRepository* DepartmentRepository_;
 
     public:
-        UnitOfWork(TEmployeeRepository* employeeRepository, TCompanyRepository* companyRepository);
+        UnitOfWork(TEmployeeRepository* employeeRepository, TDepartmentRepository* departmentRepository);
 
-        int AddCompany(const std::string &companyName);
-        int AddEmployee(int companyId, const std::string &employeeName);
-        Example::Util::Enumerable<Domain::Employee> GetCompanyEmployees(int companyId);
-        void RotateEmployee(int fromCompanyId, int toCompanyId, int employeeId);
-        void RemoveEmployee(int companyId, int employeeId);
+        int AddDepartment(const std::string &departmentName);
+        int AddEmployee(int departmentId, const std::string &employeeName);
+        Example::Util::Enumerable<Domain::Employee> GetDepartmentEmployees(int departmentId);
+        void RotateEmployee(int fromDepartmentId, int toDepartmentId, int employeeId);
+        void RemoveEmployee(int departmentId, int employeeId);
     };
 
 }

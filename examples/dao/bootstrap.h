@@ -12,9 +12,9 @@ struct IOC::Binding<Example::Dao::EmployeeRepositoryDescriptor> {
 };
 
 template<>
-struct IOC::Binding<Example::Dao::CompanyRepositoryDescriptor> {
+struct IOC::Binding<Example::Dao::DepartmentRepositoryDescriptor> {
     using TLifetime = Singleton;
-    using TService = Example::Dao::Repository<Example::Domain::Company>;
+    using TService = Example::Dao::Repository<Example::Domain::Department>;
 };
 
 template<>
@@ -22,7 +22,7 @@ struct IOC::Binding<Example::Dao::UnitOfWorkDescriptor> {
     using TLifetime = Transient;
     using TService = Example::Dao::UnitOfWork<
         IOC::Binding<Example::Dao::EmployeeRepositoryDescriptor>::TService,
-        IOC::Binding<Example::Dao::CompanyRepositoryDescriptor>::TService>;
+        IOC::Binding<Example::Dao::DepartmentRepositoryDescriptor>::TService>;
 };
 
 template<>
@@ -30,7 +30,7 @@ struct IOC::ServiceFactory<IOC::Binding<Example::Dao::UnitOfWorkDescriptor>::TSe
     static IOC::Binding<Example::Dao::UnitOfWorkDescriptor>::TService Create(const auto& container) {
         return {
             container.template Resolve<Example::Dao::EmployeeRepositoryDescriptor>(),
-            container.template Resolve<Example::Dao::CompanyRepositoryDescriptor>()
+            container.template Resolve<Example::Dao::DepartmentRepositoryDescriptor>()
         };
     }
 };
@@ -38,8 +38,8 @@ struct IOC::ServiceFactory<IOC::Binding<Example::Dao::UnitOfWorkDescriptor>::TSe
 namespace Example::Dao {
 
     using TContainer = class IOC::ServiceCollection<
-            EmployeeRepositoryDescriptor,
-            CompanyRepositoryDescriptor,
-            UnitOfWorkDescriptor>;
+        EmployeeRepositoryDescriptor,
+        DepartmentRepositoryDescriptor,
+        UnitOfWorkDescriptor>;
 
 }

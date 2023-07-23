@@ -5,7 +5,7 @@
 
 namespace Example::Domain {
 
-    struct Company {
+    struct Department {
         int Id;
         std::string Name;
         std::vector<int> Employees;
