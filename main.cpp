@@ -1,8 +1,8 @@
-#include "lib/ioc_2.h"
+#include "lib/ioc.h"
 #include "examples/dao/bootstrap.h"
 #include <iostream>
 
-using TContainer = class IOC2::ServiceCollection<Example::Dao::TContainer>;
+using TContainer = class IOC::ServiceCollection<Example::Dao::TContainer>;
 
 int main() {
     TContainer container;

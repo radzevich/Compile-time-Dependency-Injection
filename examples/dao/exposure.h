@@ -11,4 +11,3 @@ namespace Example::Dao {
 
     struct UnitOfWorkDescriptor {};
 }
-

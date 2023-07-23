@@ -4,146 +4,100 @@
 
 namespace IOC {
 
+    struct Singleton {};
+
+    struct Scoped {};
+
+    struct Transient {};
+
     template <typename TDescriptor>
     struct Binding;
 
-    template <typename TDescriptor>
-    struct Singleton {};
-
-    template <typename TDescriptor>
-    struct Scoped {};
-
-    template <typename TContainer, typename TDescriptor>
-    struct ServiceResolver {
-        using TService = typename Binding<TDescriptor>::TService;
-
-        explicit ServiceResolver(const TContainer& container) : Container_(container) {
-        }
-
-        TService Resolve() {
-            return Container_.template Create<TService>();
-        }
-
-        template <typename TFactory>
-        TService Resolve() {
-            return Container_.template Create<TService, TFactory>();
-        }
-
-    private:
-        const TContainer& Container_;
-    };
-
-    template <typename TContainer, typename TDescriptor>
-    struct ServiceResolver<TContainer, Scoped<TDescriptor>> {
-        using TService = typename Binding<TDescriptor>::TService;
-
-        explicit ServiceResolver(const TContainer& container) : Container_(container) {
-        }
-
-        TService* Resolve() {
-            return Container_.template GetOrCreate<TService>();
-        }
-
-        template <typename TFactory>
-        TService* Resolve() {
-            return Container_.template GetOrCreate<TService, TFactory>();
-        }
-
-    private:
-        const TContainer& Container_;
-    };
-
-    template <typename TContainer, typename TDescriptor>
-    struct ServiceResolver<TContainer, Singleton<TDescriptor>> {
-        using TService = typename Binding<TDescriptor>::TService;
-
-        explicit ServiceResolver(const TContainer&) {
-        }
-
-        TService* Resolve() {
-            return GetContainerSingleton().template GetOrCreate<TService>();
-        }
-
-        template <typename TFactory>
-        TService* Resolve() {
-            return GetContainerSingleton().template GetOrCreate<TService>();
-        }
-
-    private:
-        static const TContainer& GetContainerSingleton() {
-            static TContainer instance;
-            return instance;
-        }
-    };
-
-    template <typename ... TDescriptors>
-    class Container {
-    private:
-        using TContainer = Container<TDescriptors...>;
-
-    private:
-        mutable std::tuple<std::optional<typename Binding<TDescriptors>::TService>...> Instances_;
-
-    public:
-        Container() = default;
-        ~Container() = default;
-
-        Container(const Container& rhs) = delete;
-        Container& operator=(const Container& rhs) = delete;
-
-        Container(Container&& rhs) noexcept = default;
-        Container& operator=(Container&& rhs) noexcept = default;
-
-        static TContainer BeginScope() {
-            return Container<TDescriptors...>();
-        }
-
-        template<typename TDescriptor, typename TBinding = Binding<TDescriptor>>
-        [[nodiscard]] auto Resolve() const -> decltype(auto) {
-            ServiceResolver<TContainer, TDescriptor> serviceResolver(*this);
-
-            if constexpr (std::is_invocable_v<TBinding, TContainer>) {
-                return serviceResolver.template Resolve<TBinding>();
-            } else {
-                return serviceResolver.Resolve();
-            }
-        }
-
-        template<typename TService, typename TFactory>
-        [[nodiscard]] TService* GetOrCreate() const {
-            static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
-
-            auto& optInstance = std::get<std::optional<TService>>(Instances_);
-            if (optInstance.has_value()) {
-                return std::addressof(optInstance.value());
-            } else {
-                TFactory factory;
-                return std::addressof(optInstance.emplace(factory(*this)));
-            }
-        }
-
-        template<typename TService>
-        [[nodiscard]] TService* GetOrCreate() const {
-            auto& optInstance = std::get<std::optional<TService>>(Instances_);
-            if (optInstance.has_value()) {
-                return std::addressof(optInstance.value());
-            } else {
-                return std::addressof(optInstance.emplace());
-            }
-        }
-
-        template<typename TService, typename TFactory>
-        [[nodiscard]] TService Create() const {
-            static_assert(std::is_invocable_r_v<TService, TFactory, TContainer>);
-
-            TFactory factory;
-            return factory(*this);
-        }
-
-        template<typename TService>
-        [[nodiscard]] TService Create() const {
+    template <typename TService>
+    struct ServiceFactory {
+        static constexpr TService Create(const auto&) {
             return TService();
         }
+    };
+
+    template <typename TService, typename TLifetime = void>
+    struct LifetimeManager;
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Transient> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        constexpr TService GetOrCreate(const TContainer& container) {
+            return ServiceFactory<TService>::Create(container);
+        }
+    };
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Scoped> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        constexpr TService* GetOrCreate(const TContainer& container) {
+            if (!Instance_.has_value()) [[unlikely]] {
+                Instance_ = ServiceFactory<TService>::Create(container);
+            }
+
+            return std::addressof(Instance_.value());
+        }
+
+    private:
+        std::optional<TService> Instance_;
+    };
+
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Singleton> {
+        using TService = typename Binding<TDescriptor>::TService;
+
+        template<typename TContainer>
+        TService* GetOrCreate(const TContainer& container) {
+            static TService instance = ServiceFactory<TService>::Create(container);
+            return std::addressof(instance);
+        }
+    };
+
+    template <typename TDescriptor, typename ...TDescriptors>
+    class ServiceCollection;
+
+    template <typename TDescriptor>
+    class ServiceCollection<TDescriptor> {
+        using TLifetime = typename Binding<TDescriptor>::TLifetime;
+        using TLifetimeManager = LifetimeManager<TDescriptor, TLifetime>;
+
+    private:
+        mutable TLifetimeManager LifetimeManager_;
+
+    public:
+        template <typename TThisContainer>
+        auto Resolve(const TThisContainer& container) const -> decltype(auto) {
+            return LifetimeManager_.template GetOrCreate(container);
+        }
+    };
+
+    template <typename TDescriptor, typename ...TDescriptors>
+    class ServiceCollection : protected ServiceCollection<TDescriptor>
+                            , public ServiceCollection<TDescriptors...> {
+    public:
+        template <typename TRequestedDescriptor>
+        auto Resolve() const -> decltype(auto) {
+            const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this);
+            return desiredServiceCollection.Resolve(*this);
+        }
+    };
+
+    template <typename ...TInnerDescriptors, typename ...TDescriptors>
+    class ServiceCollection<ServiceCollection<TInnerDescriptors...>, TDescriptors...>
+        : public ServiceCollection<TInnerDescriptors...>
+        , public ServiceCollection<TDescriptors...> {
+    };
+
+    template <typename ...TInnerDescriptors>
+    class ServiceCollection<ServiceCollection<TInnerDescriptors...>> : public ServiceCollection<TInnerDescriptors...> {
     };
 
 }
