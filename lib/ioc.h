@@ -23,20 +23,16 @@ namespace IOC {
     template <typename TService, typename TLifetime = void>
     struct LifetimeManager;
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Transient> {
-        using TService = typename Binding<TDescriptor>::TService;
-
+    template <typename TService>
+    struct LifetimeManager<TService, Transient> {
         template<typename TContainer>
         constexpr TService GetOrCreate(const TContainer& container) {
             return ServiceFactory<TService>::Create(container);
         }
     };
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Scoped> {
-        using TService = typename Binding<TDescriptor>::TService;
-
+    template <typename TService>
+    struct LifetimeManager<TService, Scoped> {
         template<typename TContainer>
         constexpr TService* GetOrCreate(const TContainer& container) {
             if (!Instance_.has_value()) [[unlikely]] {
@@ -50,10 +46,8 @@ namespace IOC {
         std::optional<TService> Instance_;
     };
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Singleton> {
-        using TService = typename Binding<TDescriptor>::TService;
-
+    template <typename TService>
+    struct LifetimeManager<TService, Singleton> {
         template<typename TContainer>
         TService* GetOrCreate(const TContainer& container) {
             static TService instance = ServiceFactory<TService>::Create(container);
@@ -66,8 +60,9 @@ namespace IOC {
 
     template <typename TDescriptor>
     class ServiceCollection<TDescriptor> {
+        using TService = typename Binding<TDescriptor>::TService;
         using TLifetime = typename Binding<TDescriptor>::TLifetime;
-        using TLifetimeManager = LifetimeManager<TDescriptor, TLifetime>;
+        using TLifetimeManager = LifetimeManager<TService, TLifetime>;
 
     private:
         mutable TLifetimeManager LifetimeManager_;

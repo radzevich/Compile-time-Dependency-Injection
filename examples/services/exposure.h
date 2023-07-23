@@ -6,6 +6,11 @@ namespace Example::Services {
 
     struct UnitOfWorkDescriptor {};
 
-    using TContainer = class IOC::ServiceCollection<UnitOfWorkDescriptor>;
+    struct LoggerDescriptor {};
+
+    struct PrinterDescriptor {};
+
+    using TContainer = class IOC::ServiceCollection<
+            UnitOfWorkDescriptor>;
 
 }
