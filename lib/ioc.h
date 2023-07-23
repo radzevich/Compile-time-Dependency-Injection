@@ -13,10 +13,24 @@ namespace IOC {
     template <typename TDescriptor>
     struct Binding;
 
+    template <template<typename...> class TService, typename ...TDescriptors>
+    struct WithDependencies {};
+
+    template <typename TService>
+    struct ServiceFactory;
+
+
     template <typename TService>
     struct ServiceFactory {
         static constexpr TService Create(const auto&) {
             return TService();
+        }
+    };
+
+    template <template<typename...> class TService, typename... TDescriptors>
+    struct ServiceFactory<WithDependencies<TService, TDescriptors...>> {
+        static constexpr auto Create(const auto& container) -> decltype(auto) {
+            return TService(container.template Resolve<TDescriptors>()...);
         }
     };
 
@@ -26,7 +40,7 @@ namespace IOC {
     template <typename TService>
     struct LifetimeManager<TService, Transient> {
         template<typename TContainer>
-        constexpr TService GetOrCreate(const TContainer& container) {
+        constexpr auto GetOrCreate(const TContainer& container) -> decltype(auto) {
             return ServiceFactory<TService>::Create(container);
         }
     };
@@ -34,7 +48,7 @@ namespace IOC {
     template <typename TService>
     struct LifetimeManager<TService, Scoped> {
         template<typename TContainer>
-        constexpr TService* GetOrCreate(const TContainer& container) {
+        constexpr auto GetOrCreate(const TContainer& container) -> decltype(auto) {
             if (!Instance_.has_value()) [[unlikely]] {
                 Instance_ = ServiceFactory<TService>::Create(container);
             }
@@ -49,7 +63,7 @@ namespace IOC {
     template <typename TService>
     struct LifetimeManager<TService, Singleton> {
         template<typename TContainer>
-        TService* GetOrCreate(const TContainer& container) {
+        auto GetOrCreate(const TContainer& container) -> decltype(auto) {
             static TService instance = ServiceFactory<TService>::Create(container);
             return std::addressof(instance);
         }
