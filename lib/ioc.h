@@ -74,7 +74,7 @@ namespace IOC {
 
     public:
         template <typename TThisContainer>
-        auto Resolve(const TThisContainer& container) const -> decltype(auto) {
+        auto ResolveService(const TThisContainer& container) const -> decltype(auto) {
             return LifetimeManager_.template GetOrCreate(container);
         }
     };
@@ -86,7 +86,7 @@ namespace IOC {
         template <typename TRequestedDescriptor>
         auto Resolve() const -> decltype(auto) {
             const auto& desiredServiceCollection = static_cast<const ServiceCollection<TRequestedDescriptor>&>(*this);
-            return desiredServiceCollection.Resolve(*this);
+            return desiredServiceCollection.ResolveService(*this);
         }
     };
 

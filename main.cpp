@@ -1,12 +1,13 @@
 #include "lib/ioc.h"
-#include "examples/dao/bootstrap.h"
+#include "examples/bootstrap.h"
+#include "examples/exposure.h"
 #include <iostream>
 
-using TContainer = class IOC::ServiceCollection<Example::Dao::TContainer>;
+//using TContainer = IOC::ServiceCollection<Example::TContainer>;
 
 int main() {
-    TContainer container;
-    auto uow = container.Resolve<Example::Dao::UnitOfWorkDescriptor>();
+    IOC::ServiceCollection<Example::TContainer> container;
+    auto uow = container.Resolve<Example::Services::UnitOfWorkDescriptor>();
 
     auto departmentId = uow.AddDepartment("Good Department");
     uow.AddEmployee(departmentId, "Vasya");

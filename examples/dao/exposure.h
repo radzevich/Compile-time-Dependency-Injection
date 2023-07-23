@@ -1,10 +1,15 @@
 #pragma once
 
+#include "../../lib/ioc.h"
+
 namespace Example::Dao {
 
     struct EmployeeRepositoryDescriptor {};
 
     struct DepartmentRepositoryDescriptor {};
 
-    struct UnitOfWorkDescriptor {};
+    using TContainer = class IOC::ServiceCollection<
+            EmployeeRepositoryDescriptor,
+            DepartmentRepositoryDescriptor>;
+
 }

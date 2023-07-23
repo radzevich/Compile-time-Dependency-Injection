@@ -14,6 +14,10 @@ namespace Example::Dao {
             return Data_[id];
         }
 
+        const std::vector<TData>& GetAll() const {
+            return Data_;
+        }
+
         void Update(TData update) requires requires { update.Id; } {
             Data_[update.Id] = std::move(update);
         }
