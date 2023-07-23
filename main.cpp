@@ -3,10 +3,10 @@
 #include "examples/exposure.h"
 #include <iostream>
 
-//using TContainer = IOC::ServiceCollection<Example::TContainer>;
+using TContainer = Example::TContainer;
 
 int main() {
-    IOC::ServiceCollection<Example::TContainer> container;
+    TContainer container;
     auto uow = container.Resolve<Example::Services::UnitOfWorkDescriptor>();
 
     auto departmentId = uow.AddDepartment("Good Department");
