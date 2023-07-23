@@ -65,8 +65,8 @@ namespace Example::Dao {
     }
 
     template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
-    UnitOfWork<TEmployeeRepository, TCompanyRepository>::UnitOfWork(TEmployeeRepository *employeeRepository,
-                                                                    TCompanyRepository *companyRepository)
+    UnitOfWork<TEmployeeRepository, TCompanyRepository>::UnitOfWork(TEmployeeRepository* employeeRepository,
+                                                                    TCompanyRepository* companyRepository)
         : EmployeeRepository_(employeeRepository)
         , CompanyRepository_(companyRepository) {
     }

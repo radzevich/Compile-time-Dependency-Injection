@@ -27,18 +27,15 @@ namespace Example::Dao {
     template<EmployeeRepository TEmployeeRepository, CompanyRepository TCompanyRepository>
     class UnitOfWork {
     private:
-        TEmployeeRepository *EmployeeRepository_;
-        TCompanyRepository *CompanyRepository_;
+        TEmployeeRepository* EmployeeRepository_;
+        TCompanyRepository* CompanyRepository_;
 
     public:
-        UnitOfWork(TEmployeeRepository *employeeRepository, TCompanyRepository *companyRepository);
+        UnitOfWork(TEmployeeRepository* employeeRepository, TCompanyRepository* companyRepository);
 
         int AddCompany(const std::string &companyName);
-
         int AddEmployee(int companyId, const std::string &employeeName);
-
         void RotateEmployee(int fromCompanyId, int toCompanyId, int employeeId);
-
         void RemoveEmployee(int companyId, int employeeId);
     };
 

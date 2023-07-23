@@ -1,15 +1,6 @@
 #pragma once
 
-#include "util.h"
-#include "../src/service.h"
-
 #include <optional>
-
-struct ADescriptor {};
-
-struct BDescriptor {};
-
-struct CDescriptor {};
 
 namespace IOC2 {
 
@@ -71,36 +62,6 @@ namespace IOC2 {
         }
     };
 
-
-    template <>
-    struct IOC2::Binding<ADescriptor> {
-        using TService = A;
-        using TLifetime = Singleton;
-    };
-
-    template <>
-    struct IOC2::Binding<BDescriptor> {
-        using TService = B;
-        using TLifetime = Scoped;
-    };
-
-    template <>
-    struct IOC2::Binding<CDescriptor> {
-        using TService = C;
-        using TLifetime = Transient;
-    };
-
-    template <>
-    struct ServiceFactory<C> {
-        template <typename TContainer>
-        static C Create(const TContainer& container) {
-            auto* a = container.template Resolve<ADescriptor>();
-            auto* b = container.template Resolve<BDescriptor>();
-
-            return C(a, b);
-        }
-    };
-
     template <typename TDescriptor, typename ...TDescriptors>
     class ServiceCollection;
 
@@ -132,13 +93,12 @@ namespace IOC2 {
 
     template <typename ...TInnerDescriptors, typename ...TDescriptors>
     class ServiceCollection<ServiceCollection<TInnerDescriptors...>, TDescriptors...>
-            : public ServiceCollection<TInnerDescriptors...>
-            , public ServiceCollection<TDescriptors...>
-    {};
+        : public ServiceCollection<TInnerDescriptors...>
+        , public ServiceCollection<TDescriptors...> {
+    };
 
     template <typename ...TInnerDescriptors>
-    class ServiceCollection<ServiceCollection<TInnerDescriptors...>>
-            : public ServiceCollection<TInnerDescriptors...>
-    {};
+    class ServiceCollection<ServiceCollection<TInnerDescriptors...>> : public ServiceCollection<TInnerDescriptors...> {
+    };
 
 }
