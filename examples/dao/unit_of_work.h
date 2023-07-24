@@ -4,7 +4,6 @@
 #include "../domain/employee.h"
 #include "../utils/enumerable.h"
 #include "../utils/input_range.h"
-#include "exposure.h"
 #include <concepts>
 #include <string>
 

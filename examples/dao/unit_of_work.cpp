@@ -46,9 +46,9 @@ namespace Example::Dao {
     void UnitOfWork<TEmployeeRepository, TDepartmentRepository>::RemoveEmployee(int departmentId, int employeeId) {
         // remove employee from the department
         auto department = DepartmentRepository_->Get(departmentId);
-        std::erase_if(department.Employees.begin(), department.Employees.end(), [employeeId](const auto& employee) {
-            return employee.Id == employeeId;
-        });
+        department.Employees.erase(
+            std::remove(department.Employees.begin(), department.Employees.end(), employeeId),
+            department.Employees.end());
 
         // remove employee
         EmployeeRepository_->Remove(employeeId);
@@ -62,14 +62,15 @@ namespace Example::Dao {
         }
 
         // remove employee from the department
-        auto fromDepartment = DepartmentRepository_->Get(fromDepartmentId);
-        std::erase_if(fromDepartment.Employees.begin(), fromDepartment.Employees.end(), [employeeId](const auto& employee) {
-            return employee.Id == employeeId;
-        });
+        Department fromDepartment = DepartmentRepository_->Get(fromDepartmentId);
+        fromDepartment.Employees.erase(
+            std::remove(fromDepartment.Employees.begin(), fromDepartment.Employees.end(), employeeId),
+            fromDepartment.Employees.end());
+        DepartmentRepository_->Update(fromDepartment);
 
         // add employee to another department
         auto toDepartment = DepartmentRepository_->Get(toDepartmentId);
-        toDepartment.push_back(employeeId);
+        toDepartment.Employees.push_back(employeeId);
         DepartmentRepository_->Update(std::move(toDepartment));
 
         // update departmentId of employee

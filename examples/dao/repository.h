@@ -10,6 +10,11 @@ namespace Example::Dao {
         std::vector<TData> Data_;
 
     public:
+        template <typename TLogger>
+        explicit Repository(TLogger* logger) {
+            logger->Info("Connected to database of " + std::string(typeid(TData).name()));
+        }
+
         TData Get(int id) const {
             return Data_[id];
         }
