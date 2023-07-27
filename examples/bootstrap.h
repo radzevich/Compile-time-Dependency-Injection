@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../lib/ioc.h"
 #include "exposure.h"
 #include "domain/employee.h"
 #include "domain/department.h"

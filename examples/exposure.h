@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../lib/ioc.h"
 #include "domain/employee.h"
 #include "domain/department.h"
+#include "../lib/service_collection.h"
 
 namespace Example {
 
