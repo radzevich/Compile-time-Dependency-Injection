@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../binding.h"
 
 namespace IOC::Util {

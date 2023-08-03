@@ -2,6 +2,7 @@
 
 #include "lifetime.h"
 #include "service_factory.h"
+#include "util/evaluate_type.h"
 #include <memory>
 #include <optional>
 

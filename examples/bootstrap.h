@@ -44,9 +44,7 @@ struct IOC::Binding<Example::Dao::Abstract::UnitOfWorkDescriptor> {
 template<>
 struct IOC::Binding<Example::Services::Abstract::DepartmentManagementServiceDescriptor> {
     using TLifetime = Transient;
-    using TService = Example::Services::DepartmentManagementService<
-            Binding<Example::Dao::Abstract::UnitOfWorkDescriptor>::TService,
-            Binding<Example::Infra::Abstract::LoggerDescriptor>::TService>;
+    using TService = Example::Services::DepartmentManagementService<>;
 };
 
 template<>
@@ -63,24 +61,14 @@ struct IOC::Binding<Example::Services::Abstract::ReportManagementServiceDescript
 
 template<>
 struct IOC::ServiceFactory<Example::Infra::Logger> {
-    static Example::Infra::Logger Create(const auto&) {
+    static auto Create(const auto&) {
         return Example::Infra::Logger("[%s] %s %s\n");
     }
 };
 
 template<typename ...TArgs>
 struct IOC::ServiceFactory<Example::Dao::Repository<TArgs...>> {
-    static Example::Dao::Repository<TArgs...> Create(const auto& container) {
-        return Example::Dao::Repository<TArgs...>(container.template Resolve<Example::Infra::Abstract::LoggerDescriptor>());
-    }
-};
-
-template<typename ...TArgs>
-struct IOC::ServiceFactory<Example::Services::DepartmentManagementService<TArgs...>> {
     static auto Create(const auto& container) {
-        return Example::Services::DepartmentManagementService(
-                container.template Resolve<Example::Dao::Abstract::UnitOfWorkDescriptor>(),
-                container.template Resolve<Example::Infra::Abstract::LoggerDescriptor>()
-        );
+        return Example::Dao::Repository<TArgs...>(container.template Resolve<Example::Infra::Abstract::LoggerDescriptor>());
     }
 };

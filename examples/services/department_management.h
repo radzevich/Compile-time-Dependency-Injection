@@ -6,7 +6,9 @@
 
 namespace Example::Services {
 
-    template<typename TUnitOfWork, typename TLogger>
+    template<
+            typename TUnitOfWork = Dao::Abstract::UnitOfWorkDescriptor,
+            typename TLogger = Infra::Abstract::LoggerDescriptor>
     class DepartmentManagementService {
     private:
         TUnitOfWork* UnitOfWork_;
