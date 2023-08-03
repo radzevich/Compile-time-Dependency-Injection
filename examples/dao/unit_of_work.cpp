@@ -7,14 +7,14 @@ namespace Example::Dao {
     using namespace Example::Domain;
     using namespace Example::Util;
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     int UnitOfWork<TEmployeeRepository, TDepartmentRepository>::AddDepartment(const std::string& departmentName) {
         return DepartmentRepository_->Add({
             .Name = departmentName,
         });
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     int
     UnitOfWork<TEmployeeRepository, TDepartmentRepository>::AddEmployee(int departmentId, const std::string& employeeName) {
         // create employee
@@ -31,7 +31,7 @@ namespace Example::Dao {
         return employeeId;
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     void UnitOfWork<TEmployeeRepository, TDepartmentRepository>::RemoveDepartment(int departmentId) {
         // remove employees
         auto department = DepartmentRepository_->Get(departmentId);
@@ -42,7 +42,7 @@ namespace Example::Dao {
         DepartmentRepository_->Remove(departmentId);
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     void UnitOfWork<TEmployeeRepository, TDepartmentRepository>::RemoveEmployee(int departmentId, int employeeId) {
         // remove employee from the department
         auto department = DepartmentRepository_->Get(departmentId);
@@ -54,7 +54,7 @@ namespace Example::Dao {
         EmployeeRepository_->Remove(employeeId);
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     void UnitOfWork<TEmployeeRepository, TDepartmentRepository>::RotateEmployee(int fromDepartmentId, int toDepartmentId,
                                                                                 int employeeId) {
         if (fromDepartmentId == toDepartmentId) {
@@ -79,14 +79,14 @@ namespace Example::Dao {
         EmployeeRepository_->Update(std::move(employee));
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     Enumerable<Department> UnitOfWork<TEmployeeRepository, TDepartmentRepository>::GetDepartments() {
         for (auto department : DepartmentRepository_->GetAll()) {
             co_yield department;
         }
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     Enumerable<Employee> UnitOfWork<TEmployeeRepository, TDepartmentRepository>::GetDepartmentEmployees(int departmentId) {
         auto department = DepartmentRepository_->Get(departmentId);
         for (auto employeeId : department.Employees) {
@@ -94,7 +94,7 @@ namespace Example::Dao {
         }
     }
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<typename TEmployeeRepository, typename TDepartmentRepository>
     UnitOfWork<TEmployeeRepository, TDepartmentRepository>::UnitOfWork(TEmployeeRepository* employeeRepository,
                                                                     TDepartmentRepository* departmentRepository)
                                                                     : EmployeeRepository_(employeeRepository)

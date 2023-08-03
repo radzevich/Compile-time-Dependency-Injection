@@ -4,6 +4,7 @@
 #include "../domain/employee.h"
 #include "../utils/enumerable.h"
 #include "../utils/input_range.h"
+#include "abstract/repository_descriptor.h"
 #include <concepts>
 #include <string>
 
@@ -27,7 +28,9 @@ namespace Example::Dao {
         requires Util::InputRange<decltype(repository.GetAll()), Domain::Department>;
     };
 
-    template<EmployeeRepository TEmployeeRepository, DepartmentRepository TDepartmentRepository>
+    template<
+            typename TEmployeeRepository = Dao::Abstract::RepositoryDescriptor<Domain::Employee>,
+            typename TDepartmentRepository = Dao::Abstract::RepositoryDescriptor<Domain::Department>>
     class UnitOfWork {
     private:
         TEmployeeRepository* EmployeeRepository_;

@@ -4,13 +4,18 @@
 #include "../domain/employee.h"
 #include "../utils/enumerable.h"
 #include "../utils/input_range.h"
+#include "../dao/abstract/unit_of_work_descriptor.h"
+#include "../infra/abstract/printer_descriptor.h"
 
 #include <concepts>
 #include <string>
 
 namespace Example::Services {
 
-    template<typename TUnitOfWork, typename TPrinter, typename TLogger>
+    template<
+            typename TUnitOfWork = Dao::Abstract::UnitOfWorkDescriptor,
+            typename TPrinter = Infra::Abstract::PrinterDescriptor,
+            typename TLogger = Infra::Abstract::LoggerDescriptor>
     class ReportManagementService {
     private:
         TUnitOfWork* UnitOfWork_;

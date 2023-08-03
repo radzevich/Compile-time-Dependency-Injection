@@ -30,14 +30,14 @@ namespace IOC {
         }
 
     private:
-        std::optional<TService> Instance_;
+        std::optional<typename Util::EvaluateType<TService>::Type> Instance_;
     };
 
     template <typename TService>
     struct LifetimeManager<TService, Singleton> {
         template<typename TContainer>
         auto GetOrCreate(const TContainer& container) -> decltype(auto) {
-            static TService instance = ServiceFactory<TService>::Create(container);
+            static auto instance = ServiceFactory<TService>::Create(container);
             return std::addressof(instance);
         }
     };

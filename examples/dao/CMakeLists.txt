@@ -3,4 +3,4 @@ project(IOC)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(IOC_example_dao STATIC repository.cpp repository.h unit_of_work.h)
+add_library(IOC_example_dao STATIC repository.cpp repository.h unit_of_work.h abstract/repository_descriptor.h abstract/unit_of_work_descriptor.h)

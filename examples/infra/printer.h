@@ -2,12 +2,13 @@
 
 #include "../domain/employee.h"
 #include "../domain/department.h"
+#include "abstract/logger_descriptor.h"
 #include <iostream>
 #include <sstream>
 
 namespace Example::Infra {
 
-    template <typename TLogger>
+    template <typename TLogger = Abstract::LoggerDescriptor>
     class Printer {
     private:
         TLogger* Logger_;

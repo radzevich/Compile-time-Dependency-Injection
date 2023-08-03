@@ -12,7 +12,7 @@ void DoJob() {
 
     {
         TServiceCollection services;
-        auto departmentService = services.Resolve<Example::DepartmentManagementServiceDescriptor>();
+        auto departmentService = services.Resolve<Example::Services::Abstract::DepartmentManagementServiceDescriptor>();
 
         developmentDepartmentId = departmentService.Create("Development");
         qaDepartmentId = departmentService.Create("QA");
@@ -22,7 +22,7 @@ void DoJob() {
 
     {
         TServiceCollection services;
-        auto employeeService = services.Resolve<Example::EmployeeManagementServiceDescriptor>();
+        auto employeeService = services.Resolve<Example::Services::Abstract::EmployeeManagementServiceDescriptor>();
 
         bobId = employeeService.Hire(developmentDepartmentId, "Bob");
         aliceId = employeeService.Hire(qaDepartmentId, "Alice");
@@ -33,15 +33,15 @@ void DoJob() {
     {
         TServiceCollection services;
 
-        auto reportService = services.Resolve<Example::ReportManagementServiceDescriptor>();
+        auto reportService = services.Resolve<Example::Services::Abstract::ReportManagementServiceDescriptor>();
         reportService.ListDepartments();
 
-        auto employeeService = services.Resolve<Example::EmployeeManagementServiceDescriptor>();
+        auto employeeService = services.Resolve<Example::Services::Abstract::EmployeeManagementServiceDescriptor>();
         employeeService.Rotate(aliceId, qaDepartmentId, developmentDepartmentId);
         employeeService.Fire(developmentDepartmentId, bobId);
 
         // create ReportService once again
-        reportService = services.Resolve<Example::ReportManagementServiceDescriptor>();
+        reportService = services.Resolve<Example::Services::Abstract::ReportManagementServiceDescriptor>();
         reportService.ListDepartments();
     }
 

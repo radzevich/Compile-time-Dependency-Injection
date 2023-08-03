@@ -2,12 +2,16 @@
 
 #include "../domain/department.h"
 #include "../domain/employee.h"
+#include "../exposure.h"
+#include "../infra/abstract/logger_descriptor.h"
 #include <concepts>
 #include <string>
 
 namespace Example::Services {
 
-    template<typename TUnitOfWork, typename TLogger>
+    template<
+            typename TUnitOfWork = Dao::Abstract::UnitOfWorkDescriptor,
+            typename TLogger = Infra::Abstract::LoggerDescriptor>
     class EmployeeManagementService {
     private:
         TUnitOfWork* UnitOfWork_;
