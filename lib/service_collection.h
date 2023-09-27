@@ -10,9 +10,8 @@ namespace IOC {
 
     template <typename TDescriptor>
     class ServiceCollection<TDescriptor> {
-        using TService = typename Binding<TDescriptor>::TService;
         using TLifetime = typename Binding<TDescriptor>::TLifetime;
-        using TLifetimeManager = LifetimeManager<TService, TLifetime>;
+        using TLifetimeManager = LifetimeManager<TDescriptor, TLifetime>;
 
     private:
         mutable TLifetimeManager LifetimeManager_;

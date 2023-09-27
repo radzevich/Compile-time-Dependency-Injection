@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include "util/evaluate_type.h"
 
 namespace IOC {
@@ -20,7 +21,7 @@ namespace IOC {
         static constexpr auto Create(const auto& container) -> decltype(auto) {
             using TActualServiceType = typename Util::EvaluateType<TService<TDescriptors...>>::Type;
 
-            if constexpr (std::is_constructible_v<TActualServiceType, typename Util::EvaluateType<decltype(container.template Resolve<TDescriptors>())>::Type...>) {
+            if constexpr (std::is_constructible_v<TActualServiceType, decltype(container.template Resolve<TDescriptors>())...>) {
                 return TActualServiceType(container.template Resolve<TDescriptors>()...);
             } else {
                 return TActualServiceType();

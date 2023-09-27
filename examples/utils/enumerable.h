@@ -1,6 +1,6 @@
 #pragma once
 
-#include <experimental/coroutine>
+#include <coroutine>
 #include <type_traits>
 #include <utility>
 #include <exception>
@@ -27,16 +27,16 @@ namespace Example::Util {
             T value_;
 
             auto get_return_object() -> Enumerable {
-                using Handle = std::experimental::coroutine_handle<Promise>;
+                using Handle = std::coroutine_handle<Promise>;
                 return Enumerable{Handle::from_promise(*this)};
             }
 
             auto initial_suspend() {
-                return std::experimental::suspend_always(); // coroutine is suspended from the very beginning
+                return std::suspend_always(); // coroutine is suspended from the very beginning
             }
 
             auto final_suspend() noexcept {
-                return std::experimental::suspend_always(); // coroutine is suspended in the end of execution
+                return std::suspend_always(); // coroutine is suspended in the end of execution
             }
 
             void return_void() {
@@ -48,12 +48,12 @@ namespace Example::Util {
 
             auto yield_value(T&& value) {
                 value_ = std::move(value);
-                return std::experimental::suspend_always();
+                return std::suspend_always();
             }
 
             auto yield_value(const T& value) {
                 value_ = value;
-                return std::experimental::suspend_always();
+                return std::suspend_always();
             }
         };
 
@@ -70,7 +70,7 @@ namespace Example::Util {
             using pointer = T*;
             using reference = T&;
 
-            std::experimental::coroutine_handle<Promise> Handle_;
+            std::coroutine_handle<Promise> Handle_;
 
             Iterator& operator++() {
                 Handle_.resume();
@@ -94,9 +94,9 @@ namespace Example::Util {
             }
         };
 
-        std::experimental::coroutine_handle<Promise> Handle_;
+        std::coroutine_handle<Promise> Handle_;
 
-        explicit Enumerable(std::experimental::coroutine_handle<Promise> handle) : Handle_(handle) {
+        explicit Enumerable(std::coroutine_handle<Promise> handle) : Handle_(handle) {
         }
 
     public:

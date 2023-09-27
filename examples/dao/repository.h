@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <typeinfo>
 
 namespace Example::Dao {
 

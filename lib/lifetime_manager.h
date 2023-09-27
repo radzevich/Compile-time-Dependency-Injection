@@ -8,21 +8,23 @@
 
 namespace IOC {
 
-    template <typename TService, typename TLifetime = void>
+    template <typename TDescriptor, typename TLifetime>
     struct LifetimeManager;
 
-    template <typename TService>
-    struct LifetimeManager<TService, Transient> {
-        template<typename TContainer>
-        constexpr auto GetOrCreate(const TContainer& container) -> decltype(auto) {
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Transient> {
+        using TService = Binding<TDescriptor>::TService;
+
+        constexpr auto GetOrCreate(const auto& container) -> decltype(auto) {
             return ServiceFactory<TService>::Create(container);
         }
     };
 
-    template <typename TService>
-    struct LifetimeManager<TService, Scoped> {
-        template<typename TContainer>
-        constexpr auto GetOrCreate(const TContainer& container) -> decltype(auto) {
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Scoped> {
+        using TService = Binding<TDescriptor>::TService;
+
+        constexpr auto GetOrCreate(const auto& container) -> decltype(auto) {
             if (!Instance_.has_value()) [[unlikely]] {
                 Instance_ = ServiceFactory<TService>::Create(container);
             }
@@ -34,10 +36,11 @@ namespace IOC {
         std::optional<typename Util::EvaluateType<TService>::Type> Instance_;
     };
 
-    template <typename TService>
-    struct LifetimeManager<TService, Singleton> {
-        template<typename TContainer>
-        auto GetOrCreate(const TContainer& container) -> decltype(auto) {
+    template <typename TDescriptor>
+    struct LifetimeManager<TDescriptor, Singleton> {
+        using TService = Binding<TDescriptor>::TService;
+
+        auto GetOrCreate(const auto& container) -> decltype(auto) {
             static auto instance = ServiceFactory<TService>::Create(container);
             return std::addressof(instance);
         }

@@ -1,4 +1,5 @@
 #include "logger.h"
+#include <ctime>
 
 namespace Example::Infra {
 
