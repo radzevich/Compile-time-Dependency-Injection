@@ -61,14 +61,14 @@ struct IOC::Binding<Example::Services::Abstract::ReportManagementServiceDescript
 
 template<>
 struct IOC::ServiceFactory<Example::Infra::Logger> {
-    static auto Create(const auto&) {
+    static auto Create(auto&) {
         return Example::Infra::Logger("[%s] %s %s\n");
     }
 };
 
 template<typename ...TArgs>
 struct IOC::ServiceFactory<Example::Dao::Repository<TArgs...>> {
-    static auto Create(const auto& container) {
+    static auto Create(auto& container) {
         return Example::Dao::Repository<TArgs...>(container.template Resolve<Example::Infra::Abstract::LoggerDescriptor>());
     }
 };

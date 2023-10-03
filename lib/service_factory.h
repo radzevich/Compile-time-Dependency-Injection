@@ -10,7 +10,7 @@ namespace IOC {
 
     template <typename TService>
     struct ServiceFactory {
-        static constexpr TService Create(const auto&) {
+        static constexpr TService Create(auto&) {
             static_assert(std::is_default_constructible_v<TService>);
             return TService();
         }
@@ -18,7 +18,7 @@ namespace IOC {
 
     template <template<typename ...> class TService, typename... TDescriptors>
     struct ServiceFactory<TService<TDescriptors...>> {
-        static constexpr auto Create(const auto& container) -> decltype(auto) {
+        static constexpr auto Create(auto& container) {
             using TActualServiceType = typename Util::EvaluateType<TService<TDescriptors...>>::Type;
 
             if constexpr (std::is_constructible_v<TActualServiceType, decltype(container.template Resolve<TDescriptors>())...>) {

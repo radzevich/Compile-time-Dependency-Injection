@@ -8,14 +8,14 @@
 
 namespace IOC {
 
-    template <typename TDescriptor, typename TLifetime>
+    template <typename TDescriptor, typename TLifetime = typename Binding<TDescriptor>::TLifetime>
     struct LifetimeManager;
 
     template <typename TDescriptor>
     struct LifetimeManager<TDescriptor, Transient> {
         using TService = Binding<TDescriptor>::TService;
 
-        constexpr auto GetOrCreate(const auto& container) -> decltype(auto) {
+        constexpr auto GetOrCreate(auto& container) {
             return ServiceFactory<TService>::Create(container);
         }
     };
@@ -23,8 +23,9 @@ namespace IOC {
     template <typename TDescriptor>
     struct LifetimeManager<TDescriptor, Scoped> {
         using TService = Binding<TDescriptor>::TService;
+        using TRealType = Util::EvaluateType<TService>::Type;
 
-        constexpr auto GetOrCreate(const auto& container) -> decltype(auto) {
+        constexpr auto GetOrCreate(auto& container) {
             if (!Instance_.has_value()) [[unlikely]] {
                 Instance_ = ServiceFactory<TService>::Create(container);
             }
@@ -33,14 +34,15 @@ namespace IOC {
         }
 
     private:
-        std::optional<typename Util::EvaluateType<TService>::Type> Instance_;
+        std::optional<TRealType> Instance_;
     };
 
     template <typename TDescriptor>
     struct LifetimeManager<TDescriptor, Singleton> {
         using TService = Binding<TDescriptor>::TService;
 
-        auto GetOrCreate(const auto& container) -> decltype(auto) {
+        auto GetOrCreate(auto& container) {
+            // TODO: Definition of a static variable in a constexpr function is a C++23 extension
             static auto instance = ServiceFactory<TService>::Create(container);
             return std::addressof(instance);
         }
