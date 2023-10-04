@@ -11,21 +11,21 @@
 #include "services/abstract/employee_management_descriptor.h"
 #include "services/abstract/report_management_descriptor.h"
 
-using TInfraServiceCollection = class IOC::ServiceCollection<
+using TInfraContainer = class IOC::Container<
         Example::Infra::Abstract::LoggerDescriptor,
         Example::Infra::Abstract::PrinterDescriptor>;
 
-using TDaoServiceCollection = class IOC::ServiceCollection<
+using TDaoContainer = class IOC::Container<
         Example::Dao::Abstract::RepositoryDescriptor<Example::Domain::Employee>,
         Example::Dao::Abstract::RepositoryDescriptor<Example::Domain::Department>,
         Example::Dao::Abstract::UnitOfWorkDescriptor>;
 
-using TServiceServiceCollection = class IOC::ServiceCollection<
+using TServiceContainer = class IOC::Container<
         Example::Services::Abstract::DepartmentManagementServiceDescriptor,
         Example::Services::Abstract::EmployeeManagementServiceDescriptor,
         Example::Services::Abstract::ReportManagementServiceDescriptor>;
 
-using TServiceCollection = class IOC::ServiceCollection<
-        TInfraServiceCollection,
-        TDaoServiceCollection,
-        TServiceServiceCollection>;
+using TContainer = class IOC::Container<
+        TInfraContainer,
+        TDaoContainer,
+        TServiceContainer>;

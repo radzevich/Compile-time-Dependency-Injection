@@ -9,10 +9,10 @@ namespace IOC {
     concept OneOf = (std::same_as<TDescriptor, TDescriptors> || ...);
 
     template <typename ...TDescriptors>
-    class ServiceCollection;
+    class Container;
 
     template <typename ...TDescriptors>
-    class ServiceCollection {
+    class Container {
     private:
         std::tuple<LifetimeManager<TDescriptors>...> LifetimeManagers_;
 
@@ -30,8 +30,8 @@ namespace IOC {
     };
 
     template <typename ...TContainerArs, typename ...Rest>
-    class ServiceCollection<ServiceCollection<TContainerArs...>, Rest...>
-        : public ServiceCollection<Rest..., TContainerArs...> {
+    class Container<Container<TContainerArs...>, Rest...>
+        : public Container<Rest..., TContainerArs...> {
     };
 
 }

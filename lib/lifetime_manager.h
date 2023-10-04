@@ -23,7 +23,7 @@ namespace IOC {
     template <typename TDescriptor>
     struct LifetimeManager<TDescriptor, Scoped> {
         using TService = Binding<TDescriptor>::TService;
-        using TRealType = Util::EvaluateType<TService>::Type;
+        using TRealType = Util::ReplaceDescriptors<TService>::TResult;
 
         constexpr auto GetOrCreate(auto& container) {
             if (!Instance_.has_value()) [[unlikely]] {

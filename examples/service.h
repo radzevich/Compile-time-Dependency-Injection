@@ -11,7 +11,7 @@ void DoJob() {
     auto bobId = 0;
 
     {
-        TServiceCollection services;
+        TContainer services;
         auto departmentService = services.Resolve<Example::Services::Abstract::DepartmentManagementServiceDescriptor>();
 
         developmentDepartmentId = departmentService.Create("Development");
@@ -21,7 +21,7 @@ void DoJob() {
     std::cout << std::endl;
 
     {
-        TServiceCollection services;
+        TContainer services;
         auto employeeService = services.Resolve<Example::Services::Abstract::EmployeeManagementServiceDescriptor>();
 
         bobId = employeeService.Hire(developmentDepartmentId, "Bob");
@@ -31,7 +31,7 @@ void DoJob() {
     std::cout << std::endl;
 
     {
-        TServiceCollection services;
+        TContainer services;
 
         auto reportService = services.Resolve<Example::Services::Abstract::ReportManagementServiceDescriptor>();
         reportService.ListDepartments();

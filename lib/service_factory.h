@@ -19,7 +19,7 @@ namespace IOC {
     template <template<typename ...> class TService, typename... TDescriptors>
     struct ServiceFactory<TService<TDescriptors...>> {
         static constexpr auto Create(auto& container) {
-            using TActualServiceType = typename Util::EvaluateType<TService<TDescriptors...>>::Type;
+            using TActualServiceType = typename Util::ReplaceDescriptors<TService<TDescriptors...>>::TResult;
 
             if constexpr (std::is_constructible_v<TActualServiceType, decltype(container.template Resolve<TDescriptors>())...>) {
                 return TActualServiceType(container.template Resolve<TDescriptors>()...);
