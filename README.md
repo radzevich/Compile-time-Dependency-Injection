@@ -2,7 +2,7 @@
 The presented library is used for dependency injection at compile time. For this reason, it utilizes template arguments rather than interfaces, as libraries operating at runtime typically do.
 
 # How to use?
-The "FordMustang" class depends on a specific type of engine and transmission. This means that replacing one of these two components will require changes to the code of the entire class "FordMustang"
+The `FordMustang` class depends on a specific type of engine and transmission. This means that replacing one of these two components will require changes to the code of the entire class `FordMustang`
 ```cpp
 class FordMustang {
 private:
@@ -38,7 +38,7 @@ struct EngineDescriptor {};
 
 struct TransmissionDescriptor {};
 ```
-Now the descriptor needs to be specified as the default type of the template arguments. When the dependencies of the "FordMustang" class are resolved, the DI Container will identify this descriptor and substitute the corresponding implementation in its place.
+Now the descriptor needs to be specified as the default type of the template arguments. When the dependencies of the `FordMustang` class are resolved, the DI Container will identify this descriptor and substitute the corresponding implementation in its place.
 ```cpp
 template <
     typename TEngine = EngineDescriptor,
