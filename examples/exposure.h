@@ -2,7 +2,7 @@
 
 #include "domain/employee.h"
 #include "domain/department.h"
-#include "../lib/service_collection.h"
+#include <ioc/ioc.hpp>
 #include "infra/abstract/logger_descriptor.h"
 #include "infra/abstract/printer_descriptor.h"
 #include "dao/abstract/repository_descriptor.h"
