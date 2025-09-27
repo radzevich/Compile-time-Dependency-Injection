@@ -15,6 +15,7 @@ add_subdirectory(lib)
 # Build examples and main executable only when building standalone (not via FetchContent)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     option(IOC_BUILD_EXAMPLES "Build IOC examples" ON)
+    option(IOC_BUILD_TESTS "Build IOC tests" ON)
     
     if(IOC_BUILD_EXAMPLES)
         add_subdirectory(examples/dao)
@@ -34,5 +35,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
             examples/infra/abstract/printer_descriptor.h)
         
         target_link_libraries(IOC_example PRIVATE IOC::IOC)
+    endif()
+    
+    if(IOC_BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(tests)
     endif()
 endif()
