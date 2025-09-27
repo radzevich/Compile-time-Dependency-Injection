@@ -19,8 +19,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     if(IOC_BUILD_EXAMPLES)
         add_subdirectory(examples/dao)
         add_subdirectory(examples/services)
+        add_subdirectory(examples/basic)
         
-        add_executable(IOC_example main.cpp 
+        add_executable(IOC_example examples/basic/main.cpp 
             examples/domain/employee.cpp examples/domain/employee.h 
             examples/domain/department.cpp examples/domain/department.h 
             examples/utils/enumerable.cpp examples/utils/enumerable.h 
