@@ -1,6 +1,54 @@
 # IOC
 The presented library is used for dependency injection at compile time. For this reason, it utilizes template arguments rather than interfaces, as libraries operating at runtime typically do.
 
+## Installation
+
+### Using CMake FetchContent (Recommended)
+
+Add the following to your CMakeLists.txt:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  IOC
+  GIT_REPOSITORY https://github.com/radzevich/Compile-time-Dependency-Injection.git
+  GIT_TAG main  # or specify a specific tag/commit
+)
+
+FetchContent_MakeAvailable(IOC)
+
+# Link to your target
+target_link_libraries(your_target PRIVATE IOC::IOC)
+```
+
+### Using find_package (after installation)
+
+First, install the library:
+
+```bash
+git clone https://github.com/radzevich/Compile-time-Dependency-Injection.git
+cd Compile-time-Dependency-Injection
+mkdir build && cd build
+cmake .. -DIOC_BUILD_EXAMPLES=OFF
+make install
+```
+
+Then use it in your CMakeLists.txt:
+
+```cmake
+find_package(IOC REQUIRED)
+target_link_libraries(your_target PRIVATE IOC::IOC)
+```
+
+### Including in Your Code
+
+```cpp
+#include <ioc/ioc.hpp>
+
+// Now you can use IOC::Container, IOC::Binding, etc.
+```
+
 # How to use?
 The `FordMustang` class depends on a specific type of engine and transmission. This means that replacing one of these two components will require changes to the code of the entire class `FordMustang`
 ```cpp
