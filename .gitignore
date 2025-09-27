@@ -14,6 +14,16 @@
 # Build directories
 build/
 bin/
+cmake-build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+!*Config.cmake.in
 
 # IDE-specific files and directories
 .vscode/
