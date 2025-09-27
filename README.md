@@ -258,8 +258,6 @@ ctest --output-on-failure
 ./tests/ioc_tests
 ```
 
-See [TESTING.md](TESTING.md) for detailed testing documentation.
-
 ## Continuous Integration
 
 [![CI](https://github.com/radzevich/Compile-time-Dependency-Injection/workflows/CI/badge.svg)](https://github.com/radzevich/Compile-time-Dependency-Injection/actions)

@@ -1,0 +1,49 @@
+Start testing: Sep 27 14:47 UTC
+----------------------------------------------------------
+1/1 Testing: ioc_unit_tests
+1/1 Test: ioc_unit_tests
+Command: "/home/runner/work/Compile-time-Dependency-Injection/Compile-time-Dependency-Injection/build_test/tests/ioc_tests"
+Directory: /home/runner/work/Compile-time-Dependency-Injection/Compile-time-Dependency-Injection/build_test/tests
+"ioc_unit_tests" start time: Sep 27 14:47 UTC
+Output:
+----------------------------------------------------------
+Starting IOC Library Tests...
+
+=== Container Tests ===
+Running test_CanResolveSimpleService... PASSED
+Running test_TransientServiceCreatesNewInstanceEachTime... PASSED
+Running test_EmptyContainerReturnsNulloptForUnregisteredService... PASSED
+
+=== Binding Tests ===
+Running test_DefaultBindingUsesTransientLifetime... PASSED
+Running test_BindingMapsToCorrectService... PASSED
+Running test_BindingWorksWithContainer... PASSED
+Running test_SingletonBindingCreatesOneInstance... PASSED
+Running test_ScopedBindingCreatesOneInstancePerScope... FAILED: Expected 1 but got 0
+
+=== Lifetime Manager Tests ===
+Running test_TransientLifetimeCreatesNewInstanceEachTime... PASSED
+Running test_ScopedLifetimeReturnsSameInstanceInScope... FAILED: Expected 1 but got 0
+Running test_ScopedLifetimeCreatesDifferentInstanceInDifferentScope... FAILED: Expected 1 but got 0
+Running test_SingletonLifetimeReturnsSameInstanceAcrossContainers... PASSED
+
+=== Service Factory Tests ===
+Running test_CanCreateSimpleService... PASSED
+Running test_DefaultConstructibleServiceUsesDefaultConstructor... PASSED
+Running test_CustomServiceFactoryIsUsed... PASSED
+
+
+========== Test Summary ==========
+Tests run: 15
+Tests passed: 12
+Tests failed: 3
+==================================
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ioc_unit_tests" end time: Sep 27 14:47 UTC
+"ioc_unit_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 27 14:47 UTC
