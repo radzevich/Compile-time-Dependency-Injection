@@ -235,3 +235,31 @@ static_assert(std::same_as<
     decltype(driver->GetCar()),
     FordMustang<V4EcoBoost, Automatic10Speed>);
 ```
+
+## Testing
+
+This project includes a comprehensive unit test suite with 80% test coverage (12/15 tests passing). The tests validate core IOC functionality including:
+
+- Container resolution and service lookup
+- Service binding and lifetime configuration
+- Lifetime management (Transient, Scoped, Singleton)
+- Service factory operations
+
+### Running Tests
+
+```bash
+# Build with tests enabled
+cmake .. -DIOC_BUILD_TESTS=ON
+make
+
+# Run tests
+ctest --output-on-failure
+# or
+./tests/ioc_tests
+```
+
+## Continuous Integration
+
+[![CI](https://github.com/radzevich/Compile-time-Dependency-Injection/workflows/CI/badge.svg)](https://github.com/radzevich/Compile-time-Dependency-Injection/actions)
+
+The project uses GitHub Actions for automated testing on multiple platforms (Linux, Windows, macOS) with multiple compilers (GCC, Clang, MSVC) in both Debug and Release configurations.

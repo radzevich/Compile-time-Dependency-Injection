@@ -1,5 +1,5 @@
 # IOC Library CMakeLists.txt
-cmake_minimum_required(VERSION 3.24.1)
+cmake_minimum_required(VERSION 3.20)
 
 # Create the main IOC interface library
 add_library(IOC INTERFACE)
