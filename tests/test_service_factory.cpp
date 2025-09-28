@@ -50,8 +50,8 @@ struct CustomFactoryDescriptor {};
 
 class CustomService {
 public:
-    CustomService(int value) : value_(value) {}
-    int getValue() const { return value_; }
+    constexpr CustomService(int value) : value_(value) {}
+    constexpr int getValue() const { return value_; }
 
 private:
     int value_;
