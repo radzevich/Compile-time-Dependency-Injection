@@ -39,3 +39,4 @@ Makefile
 Thumbs.db
 
 cmake-build-debug
+build_test

@@ -8,6 +8,8 @@ add_executable(ioc_tests
     test_binding.cpp
     test_lifetime_manager.cpp
     test_service_factory.cpp
+    test_external.cpp
+    test_descriptor_keyed_factory.cpp
     simple_test.h
 )
 

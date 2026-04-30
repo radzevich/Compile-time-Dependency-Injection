@@ -4,48 +4,73 @@
 #include "service_factory.h"
 #include "util/evaluate_type.h"
 #include <memory>
-#include <optional>
 
 namespace IOC {
 
-    template <typename TDescriptor, typename TLifetime = typename Binding<TDescriptor>::TLifetime>
-    struct LifetimeManager;
+template <typename TDescriptor, typename TLifetime = typename Binding<TDescriptor>::TLifetime>
+struct LifetimeManager;
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Transient> {
-        using TService = Binding<TDescriptor>::TService;
+template <typename TDescriptor>
+struct LifetimeManager<TDescriptor, Transient> {
+  using TService = typename Binding<TDescriptor>::TService;
+  using TFactory = ResolveFactory_t<TService, TDescriptor>;
 
-        constexpr auto GetOrCreate(auto& container) {
-            return ServiceFactory<TService>::Create(container);
-        }
-    };
+  constexpr auto GetOrCreate(auto& container) {
+    return TFactory::Create(container);
+  }
+};
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Scoped> {
-        using TService = Binding<TDescriptor>::TService;
-        using TRealType = Util::ReplaceDescriptors<TService>::TResult;
+template <typename TDescriptor>
+struct LifetimeManager<TDescriptor, Scoped> {
+  using TService  = typename Binding<TDescriptor>::TService;
+  using TRealType = typename Util::ReplaceDescriptors<TService>::TResult;
+  using TFactory  = ResolveFactory_t<TService, TDescriptor>;
 
-        constexpr auto GetOrCreate(auto& container) {
-            if (!Instance_.has_value()) [[unlikely]] {
-                Instance_ = ServiceFactory<TService>::Create(container);
-            }
+  // Storage is std::unique_ptr (not std::optional) so non-movable / non-copyable
+  // services are supported: heap-construct in place via make_unique.
+  auto GetOrCreate(auto& container) {
+    if (!Instance_) [[unlikely]] {
+      Instance_ = TFactory::CreateUnique(container);
+    }
+    return Instance_.get();
+  }
 
-            return std::addressof(Instance_.value());
-        }
+private:
+  std::unique_ptr<TRealType> Instance_;
+};
 
-    private:
-        std::optional<TRealType> Instance_;
-    };
+template <typename TDescriptor>
+struct LifetimeManager<TDescriptor, Singleton> {
+  using TService = typename Binding<TDescriptor>::TService;
+  using TFactory = ResolveFactory_t<TService, TDescriptor>;
 
-    template <typename TDescriptor>
-    struct LifetimeManager<TDescriptor, Singleton> {
-        using TService = Binding<TDescriptor>::TService;
+  auto GetOrCreate(auto& container) {
+    // NOTE: Singleton intentionally lives in a function-local static so
+    // its lifetime spans the whole process and is shared across
+    // containers. Per-container lifetime should use Scoped.
+    static auto instance = TFactory::Create(container);
+    return std::addressof(instance);
+  }
+};
 
-        auto GetOrCreate(auto& container) {
-            // TODO: Definition of a static variable in a constexpr function is a C++23 extension
-            static auto instance = ServiceFactory<TService>::Create(container);
-            return std::addressof(instance);
-        }
-    };
+// External: the container does not own the instance. The user must call
+// Container::Bind<TDescriptor>(ptr) before the first Resolve. GetOrCreate
+// returns the registered pointer (or nullptr if Bind was never called).
+template <typename TDescriptor>
+struct LifetimeManager<TDescriptor, External> {
+  using TService  = typename Binding<TDescriptor>::TService;
+  using TRealType = typename Util::ReplaceDescriptors<TService>::TResult;
 
-}
+  constexpr TRealType* GetOrCreate(auto&) const noexcept {
+    return Instance_;
+  }
+
+  constexpr void SetInstance(TRealType* ptr) noexcept {
+    Instance_ = ptr;
+  }
+
+private:
+  TRealType* Instance_ = nullptr;
+};
+
+} // namespace IOC
